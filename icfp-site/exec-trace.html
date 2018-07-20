@@ -1,0 +1,32 @@
+
+<hr>
+<div id="glcanvas_container" style="position: relative;">
+  <canvas id="glcanvas" tabindex="0" />
+</div>
+
+<hr>
+<pre id="stdout"></pre>
+
+
+<script>
+var vis = null;
+</script>
+<script src="assets/js/three.min.js"></script>
+<script src="assets/js/Detector.js"></script>
+<script src="assets/js/stats.min.js"></script>
+<script src="assets/js/visualizer.js"></script>
+<script>
+(function () {
+  if (! Detector.webgl) {
+    const glcanvasContainer = document.getElementById('glcanvas_container');
+    const glcanvas = document.getElementById('glcanvas');
+    glcanvasContainer.removeChild(glcanvas);
+    var warning = Detector.getWebGLErrorMessage();
+    glcanvasContainer.appendChild(warning);
+  } else {
+    vis = initVisualizer({stats: true, screenshot: true, controls: true});
+  }
+})();
+</script>
+<script src="assets/js/load-file-utils.js"></script>
+<script src="assets/js/exec-trace.js"></script>
