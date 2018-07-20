@@ -14,3 +14,5 @@ sayHello();
 module.exports = {
   sayHello
 }
+
+readModel('./problemsL/LA001_tgt.mdl')
