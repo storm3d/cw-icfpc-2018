@@ -8,15 +8,11 @@ CW ICFP Contest Submission 2018
 
 ## Install
 
-    $ npm install --save cw-icfp-2018
+    $ yarn
 
 ## Usage
 
-```js
-import myModule from "cw-icfp-2018";
-
-myModule();
-```
+    $ npm test # run tests with Jest
 
 ## API
 
