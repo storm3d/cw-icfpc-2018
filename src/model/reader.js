@@ -6,7 +6,7 @@ export function readModel(file) {
     const data = fs.readFileSync(file);
     const r = data[0];
 
-    const matrix = new Matrix(r);
+    let matrix = new Matrix(r);
 
     // n = x × R × R + y × R + z
     // n = i * 8 + [0..7]
@@ -27,6 +27,8 @@ export function readModel(file) {
         setVoxel(matrix, r, num, i, 6);
         setVoxel(matrix, r, num, i, 7);
     }
+
+    return matrix
 
 }
 

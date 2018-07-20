@@ -12,7 +12,9 @@ CW ICFP Contest Submission 2018
 
 ## Usage
 
-    $ npm test # run tests with Jest
+    $ yarn test # run tests with Jest
+    $ yarn watch # watch tests with Jest
+    $ yarn start # start index.js
 
 ## API
 

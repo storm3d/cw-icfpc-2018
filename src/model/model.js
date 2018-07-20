@@ -7,7 +7,7 @@
 
 class Coord {
 
-    constructor(x = 0, y = 0, z = 0) {
+    constructor(x : number = 0, y : number = 0, z : number = 0) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -15,7 +15,7 @@ class Coord {
 }
 
 class Matrix {
-    constructor(r) {
+    constructor(r : number) {
         this.r = r;
         this._buffer = new ArrayBuffer(r * 3);
         this.voxels = new Uint8Array(this._buffer);

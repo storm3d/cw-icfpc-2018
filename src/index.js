@@ -7,12 +7,10 @@ import { readModel } from "./model/reader"
  * @param name Some name to say hello for.
  * @returns The hello.
  */
-const sayHello = (name = "Haz") => console.log(`Hello, ${name}!`);
+const sayHello = (name = "Haz") => { return `Hello, ${name}!`} ;
 
 sayHello();
 
 module.exports = {
   sayHello
 }
-
-readModel('./problemsL/LA001_tgt.mdl')
