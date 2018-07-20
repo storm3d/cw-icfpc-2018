@@ -16,9 +16,8 @@ class Coord {
 
 class Matrix {
     constructor(r : number) {
-        this.r = r;
-        this._buffer = new ArrayBuffer(r * 3);
-        this.voxels = new Uint8Array(this._buffer);
+        this.r = r;        
+        this.voxels = new Uint8Array(r*r*r);        
     }
 
     set(x, y, z, v) {
