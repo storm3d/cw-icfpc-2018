@@ -17,6 +17,7 @@
     "dist"
   ],
   "scripts": {
+    "pretest": "babel src -d dist",
     "test": "jest",
     "coverage": "npm test -- --coverage",
     "postcoverage": "opn coverage/lcov-report/index.html",

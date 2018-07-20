@@ -1,4 +1,4 @@
-import sayHello from "../src";
+import {sayHello} from "../dist/index";
 
 test("sayHello", () => {
   expect(sayHello()).toBe("Hello, Haz!");

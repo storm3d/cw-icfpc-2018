@@ -28,6 +28,8 @@ export function readModel(file) {
         setVoxel(matrix, r, num, i, 7);
     }
 
+    return { r, matrix };
+
 }
 
 function setVoxel(matrix: Matrix, r, num, byte, bit) {
