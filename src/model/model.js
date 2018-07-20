@@ -26,6 +26,10 @@ class Matrix {
         this.voxels = new Uint8Array(this._buffer);
     }
 
+    set(x, y, z, v) {
+        this.voxels[this.coord2index(x, y, z)] = v;
+    }
+
     fill(x, y, z) {
         this.voxels[this.coord2index(x, y, z)] = 1;
     }
