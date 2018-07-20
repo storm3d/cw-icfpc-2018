@@ -1,7 +1,7 @@
 import { fs } from "fs";
 import { Matrix } from "./model"
 
-function readModel(file) {
+export function readModel(file) {
 
     const data = fs.readFileSync(file);
     const r = data[0];
@@ -18,20 +18,30 @@ function readModel(file) {
     for (var i = 0; i < r * r * r / 8; i++)
     {
         var num = data[i + 1];
-        setVoxel(matrix, num, i * 8, 0);
-        setVoxel(matrix, num, i * 8, 1);
-        setVoxel(matrix, num, i * 8, 2);
-        setVoxel(matrix, num, i * 8, 3);
-        setVoxel(matrix, num, i * 8, 4);
-        setVoxel(matrix, num, i * 8, 5);
-        setVoxel(matrix, num, i * 8, 6);
-        setVoxel(matrix, num, i * 8, 7);
+        setVoxel(matrix, r, num, i, 0);
+        setVoxel(matrix, r, num, i, 1);
+        setVoxel(matrix, r, num, i, 2);
+        setVoxel(matrix, r, num, i, 3);
+        setVoxel(matrix, r, num, i, 4);
+        setVoxel(matrix, r, num, i, 5);
+        setVoxel(matrix, r, num, i, 6);
+        setVoxel(matrix, r, num, i, 7);
     }
 
 }
 
-function setVoxel(matrix, num, n, bit) {
-    const z = n ;
+function setVoxel(matrix: Matrix, r, num, byte, bit) {
+
+  if (!bitTest(num, bit))
+    return;
+
+  const n = byte * 8 + bit;
+  const z = n % r;
+  const y = (n - z) / r % r;
+  const x = (n - z - y) / r / r;
+
+  if (x < r && y < r && z < r)
+    matrix.fill(x, y, z);
 }
 
 function bitTest(num, bit) {
