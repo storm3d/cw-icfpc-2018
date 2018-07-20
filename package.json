@@ -17,8 +17,9 @@
     "dist"
   ],
   "scripts": {
+    "pretest": "babel src -d dist",
     "test": "jest",
-    "watch": "jest --watch",
+    "watch": "jest --watchAll",
     "coverage": "npm test -- --coverage",
     "postcoverage": "opn coverage/lcov-report/index.html",
     "lint": "eslint src test",

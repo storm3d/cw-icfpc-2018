@@ -7,7 +7,7 @@ import { readModel } from "./model/reader"
  * @param name Some name to say hello for.
  * @returns The hello.
  */
-const sayHello = (name = "Haz") => { return `Hello, ${name}!`} ;
+const sayHello = (name = "Haz") => `Hello, ${name}!`;
 
 sayHello();
 
