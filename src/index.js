@@ -5,6 +5,10 @@
  * @param name Some name to say hello for.
  * @returns The hello.
  */
-const sayHello = (name: string = "Haz"): string => `Hello, ${name}!`;
+const sayHello = (name = "Haz") => console.log(`Hello, ${name}!`);
 
-export default sayHello;
+sayHello();
+
+module.exports = {
+  sayHello
+}

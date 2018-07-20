@@ -1,5 +1,7 @@
-.idea/
+.idea/.DS_Store
 node_modules
+dfltTracesL
+problemsL
 coverage
 dist
 *.log
