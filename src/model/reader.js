@@ -1,5 +1,5 @@
 import { fs } from "fs";
-import { Matrix } from "./model"
+import { Matrix } from "../model"
 
 export function readModel(file) {
 
