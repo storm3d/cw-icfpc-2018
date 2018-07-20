@@ -32,7 +32,7 @@
     "version": "standard-changelog && git add CHANGELOG.md",
     "postpublish": "git push origin master --follow-tags",
     "prestart": "babel src -d dist",
-    "start": "node src/index.js"
+    "start": "node dist/index.js"
   },
   "jest": {
     "testEnvironment": "node"
