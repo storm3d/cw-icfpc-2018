@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
-zip -r submission.zip $1
+cd $1
+zip submission.zip *
+mv submission.zip .. && cd ..
 sha=$(shasum -a 256 submission.zip | awk '{ print $1 }')
 scp submission.zip bodva@thebodva.com:/var/www/thebodva.com/www/upload
 curl -L \
