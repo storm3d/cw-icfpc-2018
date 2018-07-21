@@ -212,7 +212,34 @@ export class Void {
   }
 
   toString() : string {
-    return "Fill<"+nd+">"
+    return "Void<"+nd+">"
   }
 }
 
+export class GFill {
+  constructor(nd : Coord, fd : Coord) {
+    this.nd = nd;
+    this.fd = fd;
+  }
+
+  run(state : State, bid : number) { throw "unsupported" }
+
+  toString() : string {
+    return "GFill"
+  }
+
+}
+
+export class GVoid {
+  constructor(nd : Coord, fd : Coord) {
+    this.nd = nd;
+    this.fd = fd;
+  }
+
+  run(state : State, bid : number) { throw "unsupported" }
+
+  toString() : string {
+    return "GVoid"
+  }
+
+}
