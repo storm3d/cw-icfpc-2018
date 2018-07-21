@@ -26,7 +26,7 @@ export class Halt {
   }
 
   toString() : string {
-
+      "Halt"
   }
 }
 
@@ -36,6 +36,7 @@ export class Wait {
   }
 
   toString() : string {
+    "Wait"
   }
 }
 
@@ -45,6 +46,7 @@ export class Flip {
   }
 
   toString() : string {
+    "Flip"
   }
 }
 
@@ -69,6 +71,7 @@ export class SMove {
   }
 
   toString() : string {
+    "SMove"+ c
   }
 }
 
@@ -99,6 +102,7 @@ export class LMove {
   }
 
   toString() : string {
+    "LMove"
   }
 }
 
@@ -110,6 +114,7 @@ export class FusionP {
   run(state : State, bid : number) { throw "unsupported" }
 
   toString() : string {
+    "FusionP"
   }
 
 }
@@ -122,6 +127,7 @@ export class FusionS {
   run(state : State, bid : number) { throw "unsupported" }
 
   toString() : string {
+    "FusionS"
   }
 
 }
@@ -135,6 +141,7 @@ export class Fission {
   run(state : State, bid : number) {}
 
   toString() : string {
+    "Fission"
   }
 }
 
@@ -158,6 +165,7 @@ export class Fill {
   }
 
   toString() : string {
+    "Fill"+c
   }
 }
 
