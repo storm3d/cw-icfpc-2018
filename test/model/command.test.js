@@ -97,4 +97,20 @@ describe('command ', () => {
 
   })
 
+  it("Void should work", () => {
+
+    const nd = new Coord(1, 0, 0)
+    const fill = new trace.Fill(nd)
+
+    expect(state.getEnergy()).toBe(0)
+    fill.run(state, 1)
+    expect(state.getEnergy()).toBe(12)
+    expect(state.matrix.isFilled(nd.x, nd.y, nd.z)).toBe(true);
+
+    const voidC = new trace.Void(nd)
+    voidC.run(state, 1)
+
+    expect(state.matrix.isFilled(nd.x, nd.y, nd.z)).toBe(false);
+  })
+
 })
