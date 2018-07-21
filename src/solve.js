@@ -56,18 +56,18 @@ export default class Solver {
 
   fillVoxel(c: Coord) {
     let commands = [];
-
+/*
     const botPos = this.state.getBot(1).pos;
     this.floatingVoxels.fill(botPos.getAdded(c));
 
     if (!this.floatingVoxels.allGrounded() && this.state.harmonics === 0)
       commands.push(new command.Flip());
-
+*/
     commands.push(new command.Fill(c));
-
+/*
     if (this.floatingVoxels.allGrounded() && this.state.harmonics !== 0)
       commands.push(new command.Flip());
-
+*/
     return commands;
   }
 
@@ -105,7 +105,7 @@ export default class Solver {
         break
 
       let c = slice[bestI]
-      slice[bestI] = undefined
+
       let botC = c.getAdded(new Coord(0, 1, 0))
       //console.log(botC)
 
@@ -113,7 +113,15 @@ export default class Solver {
       //console.log(path)
       commands = commands.concat(path)
       cc = botC
-      commands = commands.concat(this.fillVoxel(new Coord(0, -1, 0)));
+
+      for (let i = 0; i < slice.length; i++) {
+        if (!slice[i])
+          continue
+        if (Math.abs(slice[i].x - botC.x) + Math.abs(slice[i].z - botC.z) <= 1) {
+          commands = commands.concat(this.fillVoxel(new Coord(Math.sign(slice[i].x - botC.x), -1, Math.sign(slice[i].z - botC.z))))
+          slice[i] = undefined
+        }
+      }
     }
 
     return commands
@@ -129,7 +137,7 @@ export default class Solver {
 
     let trace = new command.Trace(this.state)
 
-    // trace.execCommand(new command.Flip())
+    trace.execCommand(new command.Flip())
 
     for (let level = 0; level < matrix.r; level++) {
       let slice = this.getSlice(targetMatrix, level)
