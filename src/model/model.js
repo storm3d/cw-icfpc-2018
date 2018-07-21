@@ -10,6 +10,16 @@ class Coord {
     this.y = y;
     this.z = z;
   }
+
+  addVector(v: Coord) {
+    this.x += v.x
+    this.y += v.y
+    this.z += v.z
+  }
+
+  getAdded(v: Coord) {
+    return new Coord(this.x + v.x, this.y + v.y, this.z + v.z)
+  }
 }
 
 class Matrix {
@@ -52,7 +62,11 @@ class State {
     this.energy = 0;
     this.harmonics = 0;
     this.matrix = matrix;
-    this.bots = [bot];
+    this.bots = {1 : bot};
+  }
+
+  getBotsNum() {
+    return Object.keys(this.bots).length
   }
 }
 

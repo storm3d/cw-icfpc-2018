@@ -49,6 +49,10 @@ export class Fill {
     this.nd = nd;
   }
 
-  run(state : State, bid : number) {}
+  run(state : State, bid : number) {
+    let bot = state.bots[bid]
+    let c = bot.pos.getAdded(this.nd)
+    state.matrix.fill(c)
+  }
 }
 

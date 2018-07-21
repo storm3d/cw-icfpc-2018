@@ -2,11 +2,15 @@ import { Coord, Matrix, Bot, State } from "../../src/model/model";
 
 test("Coord ctor", () => {
   const c = new Coord(1, 2, 3);
-
   expect(c.x).toBe(1);
   expect(c.y).toBe(2);
   expect(c.z).toBe(3);
 
+  const v = new Coord(1, -1, 0);
+  c.addVector(v)
+  expect(c.x).toBe(2);
+  expect(c.y).toBe(1);
+  expect(c.z).toBe(3);
 });
 
 test("Matrix", () => {
@@ -26,8 +30,8 @@ test("State", () => {
   let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x+=2))
   let state = new State(matrix, bot)
 
-  expect(state.bots.length).toBe(1)
-  expect(state.bots[0].seeds.length).toBe(19)
-  expect(state.bots[0].seeds[0]).toBe(2)
+  expect(state.getBotsNum()).toBe(1)
+  expect(state.bots[1].seeds.length).toBe(19)
+  expect(state.bots[1].seeds[0]).toBe(2)
 
 });
