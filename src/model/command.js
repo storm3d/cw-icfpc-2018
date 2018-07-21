@@ -171,6 +171,30 @@ export class Fill {
   constructor(nd : Coord) {
     if(!nd.isNearCoordDiff())
       throw "Not a nd"
+    this.nd = nd.getCopy();
+  }
+
+  run(state : State, bid : number) {
+    let bot = state.getBot(bid)
+    let c = bot.pos.getAdded(this.nd)
+    if(!state.matrix.isValidCoord(c))
+      throw "Not valid coord"
+
+    let isAlreadyFilled = state.matrix.isFilled(c.x, c.y, c.z)
+    state.matrix.fill(c.x, c.y, c.z)
+
+    state.spendEnergy(isAlreadyFilled ? 6 : 12)
+  }
+
+  toString() : string {
+    return `Fill ${this.nd}`;
+  }
+}
+
+export class Void {
+  constructor(nd : Coord) {
+    if(!nd.isNearCoordDiff())
+      throw "Not a nd"
     this.nd = nd;
   }
 
@@ -180,14 +204,14 @@ export class Fill {
     if(!state.matrix.isValidCoord(c))
       throw "Not valid coord"
 
-    let isAlreadyFilled = state.matrix.isFilled(c)
-    state.matrix.fill(c)
+    let isAlreadyFilled = state.matrix.isFilled(c.x, c.y, c.z)
+    state.matrix.clear(c.x, c.y, c.z)
 
-    state.spendEnergy(isAlreadyFilled ? 6 : 12)
+    state.spendEnergy(isAlreadyFilled ? -12 : 3)
   }
 
   toString() : string {
-    return `Fill ${this.nd}`;
+    return "Fill<"+nd+">"
   }
 }
 

@@ -89,7 +89,7 @@ class Matrix {
     this.voxels[this.coord2index(x, y, z)] = v;
   }
 
-  fill(x, y, z) {
+  fill(x: numder, y: number, z: numder) {
     this.voxels[this.coord2index(x, y, z)] = 1;
   }
 

@@ -67,19 +67,18 @@ describe('command ', () => {
     const nd2 = new Coord(10, 10, 10)
     expect(state.matrix.isFilled(nd2)).toBe(false);
 
-
     const nd = new Coord(1, 0, 0)
-    //const fill = new trace.Fill(nd)
+    const fill = new trace.Fill(nd)
 
-    //expect(state.getEnergy()).toBe(0)
-    //fill.run(state, 1)
-    //expect(state.getEnergy()).toBe(12)
-    //fill.run(state, 1)
-    //expect(state.getEnergy()).toBe(12+6)
-
-    //expect(state.matrix.isFilled(nd)).toBe(true);
+    expect(state.getEnergy()).toBe(0)
+    fill.run(state, 1)
     expect(state.matrix.isFilled(nd2)).toBe(false);
 
+    expect(state.getEnergy()).toBe(12)
+    fill.run(state, 1)
+    expect(state.getEnergy()).toBe(12+6)
+
+    expect(state.matrix.isFilled(nd.x, nd.y, nd.z)).toBe(true);
 
     expect(() => {
       const nnd = new Coord(1, 1, 1)
