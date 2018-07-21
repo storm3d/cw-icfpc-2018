@@ -1,6 +1,6 @@
 // @flow
 
-import { Bot, Coord, Matrix, State } from "./model/model";
+import { Bot, Coord, Matrix } from "./model/model";
 import * as command from "./model/command"
 import * as model from "./model/model"
 import FloatingVoxels from "./model/floating-voxels";
@@ -147,7 +147,8 @@ export default class Solver {
     //console.log(this.state.getBot(1).pos)
     trace.execCommands(this.getPath(this.state.getBot(1).pos, origin, true))
 
-    trace.execCommand(new command.Flip())
+    if (this.state.harmonics !== 0 )
+      trace.execCommand(new command.Flip())
     trace.execCommand(new command.Halt())
 
     return trace
