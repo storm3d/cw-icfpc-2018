@@ -1,10 +1,16 @@
 // @flow
 
 import UnionFind from "./union-find";
-import { Coord, Matrix } from "./model";
+import { Matrix } from "./model";
 
 
 export default class FloatingVoxels {
+
+  r: number;
+  r2: number;
+  floating: Set<number>;
+  sinkIndex: number;
+  uf: UnionFind;
 
   constructor(r: number) {
 
@@ -28,11 +34,11 @@ export default class FloatingVoxels {
     return this.floating.size === 0;
   }
 
-  toUfIndex(x, y, z) {
+  toUfIndex(x: number, y: number, z: number) {
     return x + y * this.r + z * this.r2;
   }
 
-  fill(x, y, z, matrix: Matrix) {
+  fill(x: number, y: number, z: number, matrix: Matrix) {
     const index: number = this.toUfIndex(x, y, z);
 
     if (x > 0 && matrix.isFilled(x - 1, y, z)) {

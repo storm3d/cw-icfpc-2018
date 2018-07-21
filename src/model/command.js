@@ -2,25 +2,28 @@
 import { Coord, State } from "./model";
 
 export class Trace {
+  state: State;
+  commands: Array<any>;
+
   constructor(state: State) {
     this.state = state;
     this.commands = [];
   }
 
-  execCommand(c) {
+  execCommand(c: any) {
     this.commands.push(c)
     c.run(this.state, 1)
 
     this.state.doEnergyTick()
   }
 
-  execCommands(arr: Array) {
+  execCommands(arr: []) {
     for (let c of arr) {
       this.execCommand(c)
     }
   }
 
-  toString(max) {
+  toString(max: number) {
 
     let n = max ? max : this.commands.length;
 
@@ -74,6 +77,8 @@ export class Flip {
 }
 
 export class SMove {
+  lld: Coord;
+
   constructor(lld: Coord) {
     if (!lld.isLongLinearDiff())
       throw "Not a lld"
@@ -94,11 +99,14 @@ export class SMove {
   }
 
   toString(): string {
-    return `SMove ${this.lld}`;
+    return `SMove ${this.lld.toString()}`;
   }
 }
 
 export class LMove {
+  sld1: Coord;
+  sld2: Coord;
+
   constructor(sld1: Coord, sld2: Coord) {
     if (!sld1.isShortLinearDiff())
       throw "1 is not a sld"
@@ -125,11 +133,13 @@ export class LMove {
   }
 
   toString(): string {
-    return `LMove ${this.sld1} ${this.sld2}`;
+    return `LMove ${this.sld1.toString()} ${this.sld2.toString()}`;
   }
 }
 
 export class FusionP {
+  nd: Coord;
+
   constructor(nd: Coord) {
     this.nd = nd;
   }
@@ -145,6 +155,8 @@ export class FusionP {
 }
 
 export class FusionS {
+  nd: Coord;
+
   constructor(nd: Coord) {
     this.nd = nd;
   }
@@ -160,6 +172,9 @@ export class FusionS {
 }
 
 export class Fission {
+  nd: Coord;
+  m: number;
+
   constructor(nd: Coord, m: number) {
     this.nd = nd;
     this.m = m;
@@ -174,6 +189,8 @@ export class Fission {
 }
 
 export class Fill {
+  nd: Coord;
+
   constructor(nd: Coord) {
     if (!nd.isNearCoordDiff())
       throw "Not a nd"
@@ -193,11 +210,13 @@ export class Fill {
   }
 
   toString(): string {
-    return `Fill ${this.nd}`;
+    return `Fill ${this.nd.toString()}`;
   }
 }
 
 export class Void {
+  nd: Coord;
+
   constructor(nd: Coord) {
     if (!nd.isNearCoordDiff())
       throw "Not a nd"
@@ -217,11 +236,14 @@ export class Void {
   }
 
   toString(): string {
-    return `Void ${this.nd}`
+    return `Void ${this.nd.toString()}`
   }
 }
 
 export class GFill {
+  nd: Coord;
+  fd: Coord;
+
   constructor(nd: Coord, fd: Coord) {
     this.nd = nd;
     this.fd = fd;
@@ -232,12 +254,15 @@ export class GFill {
   }
 
   toString(): string {
-    return `GFill ${this.nd} ${this.fd}`
+    return `GFill ${this.nd.toString()} ${this.fd.toString()}`
   }
 
 }
 
 export class GVoid {
+  nd: Coord;
+  fd: Coord;
+
   constructor(nd: Coord, fd: Coord) {
     this.nd = nd;
     this.fd = fd;
@@ -248,7 +273,7 @@ export class GVoid {
   }
 
   toString(): string {
-    return `GVoid ${this.nd} ${this.fd}`
+    return `GVoid ${this.nd.toString()} ${this.fd.toString()}`
   }
 
 }

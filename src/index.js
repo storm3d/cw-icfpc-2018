@@ -1,4 +1,3 @@
-// @flow
 import fs from 'fs'
 import {readModel} from "./model/reader"
 import {serializeTrace} from "./model/writer";
@@ -32,7 +31,7 @@ const exec = (inputFolder: string, outputFolder: string, num: string) => {
         } else {
             return dump.length;
         }
-    });;
+    });
 
 };
 

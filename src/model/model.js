@@ -1,6 +1,10 @@
 // @flow
 
 class Coord {
+  x: number;
+  y: number;
+  z: number;
+
   constructor(x: number = 0, y: number = 0, z: number = 0) {
     this.x = x;
     this.y = y;
@@ -68,40 +72,47 @@ class Coord {
 }
 
 class Region {
+  c1: Coord;
+  c2: Coord;
+
   constructor(c1: Coord, c2: Coord) {
     this.c1 = c1
     this.c2 = c2
   }
 
   getDim() {
+    throw "unsupported";
   }
 }
 
-export const coord: Coord = (x: number, y: number, z: number) => (new Coord(x, y, z));
+export const coord = (x: number, y: number, z: number) : Coord => (new Coord(x, y, z));
 
 class Matrix {
+  r: number;
+  voxels: Uint8Array;
+
   constructor(r: number) {
     this.r = r;
     this.voxels = new Uint8Array(r * r * r);
   }
 
-  set(x, y, z, v) {
+  set(x: number, y: number, z: number, v: number) {
     this.voxels[this.coord2index(x, y, z)] = v;
   }
 
-  fill(x: numder, y: number, z: number) {
+  fill(x: number, y: number, z: number) {
     this.voxels[this.coord2index(x, y, z)] = 1;
   }
 
-  clear(x, y, z) {
+  clear(x: number, y: number, z: number) {
     this.voxels[this.coord2index(x, y, z)] = 0;
   }
 
-  isFilled(x, y, z) {
+  isFilled(x: number, y: number, z: number) {
     return this.voxels[this.coord2index(x, y, z)] > 0;
   }
 
-  coord2index(x, y, z) {
+  coord2index(x: number, y: number, z: number) {
     return x + this.r * y + this.r * this.r * z;
   }
 
@@ -111,7 +122,11 @@ class Matrix {
 }
 
 class Bot {
-  constructor(bid: number, pos: Coord, seeds: Array) {
+  bid: number;
+  pos: Coord;
+  seeds: Array<number>;
+
+  constructor(bid: number, pos: Coord, seeds: Array<number>) {
     this.bid = bid;
     this.pos = pos;
     this.seeds = seeds;
@@ -119,11 +134,17 @@ class Bot {
 }
 
 class State {
+  energy: number;
+  harmonics: number;
+  matrix: Matrix;
+  bots: any;
+
   constructor(matrix: Matrix, bot: Bot) {
     this.energy = 0;
     this.harmonics = 0;
     this.matrix = matrix;
-    this.bots = {1 : bot};
+    this.bots = {};
+    this.bots[1] = bot;
   }
 
   getBotsNum() {
@@ -136,7 +157,7 @@ class State {
     return this.bots[bid]
   }
 
-  spendEnergy(energy) {
+  spendEnergy(energy: number) {
     this.energy+=energy
   }
 

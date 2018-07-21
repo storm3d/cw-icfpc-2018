@@ -1,13 +1,17 @@
 // @flow
 
-import { Bot, Coord, Matrix } from "./model/model";
+import { Bot, Coord, Matrix, State } from "./model/model";
 import * as command from "./model/command"
 import * as model from "./model/model"
 import FloatingVoxels from "./model/floating-voxels";
 
 export default class Solver {
 
-  getSlice(m: Matrix, y: number): Array {
+  trace: command.Trace;
+  state: State;
+  floatingVoxels : FloatingVoxels;
+
+  getSlice(m: Matrix, y: number): Array<Coord> {
 
     let slice = []
     for (let z = 0; z < m.r; z++)
@@ -18,7 +22,7 @@ export default class Solver {
     return slice
   }
 
-  getPath(c1: Coord, c2: Coord, isBack = false): Array {
+  getPath(c1: Coord, c2: Coord, isBack: boolean = false) : void {
     let cc = c1.getCopy();
 
     if (!isBack) {
@@ -66,7 +70,7 @@ export default class Solver {
 
   }
 
-  fillSlice(start: Coord, slice: Array, matrix: Matrix) {
+  fillSlice(start: Coord, slice: Array<Coord>, matrix: Matrix) {
     let cc = start.getCopy();
 
     let isGrounded = false
@@ -112,7 +116,7 @@ export default class Solver {
           continue
         if (Math.abs(slice[i].x - botC.x) + Math.abs(slice[i].z - botC.z) <= 1) {
           this.fillVoxel(new Coord(Math.sign(slice[i].x - botC.x), -1, Math.sign(slice[i].z - botC.z)))
-          slice[i] = undefined
+          delete slice[i];
         }
       }
     }
