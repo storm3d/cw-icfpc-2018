@@ -4,11 +4,11 @@ import {serializeTrace} from "./model/writer";
 import Solver from "./solve";
 
 const modelName = (num: string) => {
-    return "LA" + num + "_tgt.mdl";
+    return "FA" + num + "_tgt.mdl";
 };
 
 const traceName = (num: string) => {
-    return "LA" + num + '.nbt';
+    return "FA" + num + '.nbt';
 };
 
 const exec = (inputFolder: string, outputFolder: string, num: string) => {
@@ -38,8 +38,8 @@ const exec = (inputFolder: string, outputFolder: string, num: string) => {
 
 };
 
-if (process.send !== undefined) {
-    exec('problemsL', "solve", "001");
+if (process.send === undefined) {
+    exec('problemsF', "solveF", "001");
 }
 
 process.on('message', (msg) => {
@@ -50,7 +50,7 @@ process.on('message', (msg) => {
             process.send('message');
         }
     } else {
-        exec('problemsL', 'solve', msg);
+        exec('problemsF', 'solveF', msg);
     }
 });
 
