@@ -50,6 +50,10 @@ class Coord {
     return this.getMlen() <= 2 && this.getClen() === 1
   }
 
+  isFarCoordDiff() {
+    return this.getClen() > 0 && this.getClen() <= 30
+  }
+
   isEqual(c : Coord) {
     return this.x === c.x && this.y === c.y && this.z === c.z
   }
