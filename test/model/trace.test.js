@@ -14,6 +14,17 @@ describe('command ', () => {
   it("Halt should work", () => {
     const halt = new trace.Halt()
     halt.run(state, 1)
+    expect(state.getBotsNum()).toBe(1)    
+  })
+
+  it("Halt when harmonics not equal to 0", ()=>{
+    const halt = new trace.Halt()
+    const flip = new trace.Flip()
+    flip.run(state, 1)
+    expect(()=>{
+      halt.run(state, 1)
+
+    }).toThrow("Not low harmonics")
   })
 
   it("Flip should work", () => {
