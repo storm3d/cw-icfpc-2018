@@ -1,8 +1,4 @@
-// matrix
-// state (energy, harmonics, matrix, bots, trace)
-// bot (bid, pos, seeds)
-
-// coord
+// @flow
 
 class Coord {
   constructor(x: number = 0, y: number = 0, z: number = 0) {
@@ -126,7 +122,7 @@ class State {
     return Object.keys(this.bots).length
   }
 
-  getBot(bid : number) {
+  getBot(bid : number): Bot {
     if(!this.bots[bid])
       throw "Bot not found"
     return this.bots[bid]

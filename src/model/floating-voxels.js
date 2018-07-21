@@ -1,3 +1,5 @@
+// @flow
+
 import UnionFind from "./union-find";
 import { Coord, Matrix } from "./model";
 

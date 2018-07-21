@@ -1,8 +1,8 @@
 // @flow
 import fs from 'fs'
-import {solve} from "./solve"
 import {readModel} from "./model/reader"
 import {serializeTrace} from "./model/writer";
+import Solver from "./solve";
 
 const modelName = (num: string) => {
     return "LA" + num + "_tgt.mdl";
@@ -17,7 +17,7 @@ const exec = (inputFolder: string, outputFolder: string, num: string) => {
     console.log(modelFileName);
     const m = readModel(modelFileName);
 
-    let solution = solve(m);
+    let solution = new Solver().solve(m);
     let dump = serializeTrace(solution.commands);
 
     // console.log(dump)
