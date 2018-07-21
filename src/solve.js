@@ -19,25 +19,29 @@ const getPath = (c1: Coord, c2: Coord, isBack = false) => {
 
   if(!isBack) {
     while (cc.y !== c2.y) {
-      commands.push(new command.SMove(new Coord(0, Math.sign(c2.y - cc.y), 0)))
-      cc.y += Math.sign(c2.y - cc.y)
+      let diff = Math.sign(c2.y - cc.y)*(Math.abs(c2.y - cc.y) > 15 ? 15 : Math.abs(c2.y - cc.y))
+      commands.push(new command.SMove(new Coord(0, diff, 0)))
+      cc.y += diff
     }
   }
 
   while(cc.x !== c2.x) {
-    commands.push(new command.SMove(new Coord(Math.sign(c2.x - cc.x), 0, 0)))
-    cc.x += Math.sign(c2.x - cc.x)
+    let diff = Math.sign(c2.x - cc.x)*(Math.abs(c2.x - cc.x) > 15 ? 15 : Math.abs(c2.x - cc.x))
+    commands.push(new command.SMove(new Coord(diff, 0, 0)))
+    cc.x += diff
   }
 
   while(cc.z !== c2.z) {
-    commands.push(new command.SMove(new Coord(0, 0, Math.sign(c2.z - cc.z))))
-    cc.z += Math.sign(c2.z - cc.z)
+    let diff = Math.sign(c2.z - cc.z)*(Math.abs(c2.z - cc.z) > 15 ? 15 : Math.abs(c2.z - cc.z))
+    commands.push(new command.SMove(new Coord(0, 0, diff)))
+    cc.z += diff
   }
 
   if(isBack) {
     while (cc.y !== c2.y) {
-      commands.push(new command.SMove(new Coord(0, Math.sign(c2.y - cc.y), 0)))
-      cc.y += Math.sign(c2.y - cc.y)
+      let diff = Math.sign(c2.y - cc.y)*(Math.abs(c2.y - cc.y) > 15 ? 15 : Math.abs(c2.y - cc.y))
+      commands.push(new command.SMove(new Coord(0, diff, 0)))
+      cc.y += diff
     }
   }
 
