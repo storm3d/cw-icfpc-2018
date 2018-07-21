@@ -13,13 +13,15 @@ const getSlice = (m: Matrix, y: number) => {
   return slice
 }
 
-const getPath = (c1: Coord, c2: Coord) => {
+const getPath = (c1: Coord, c2: Coord, isBack = false) => {
   let cc = c1.getCopy();
   let commands = []
 
-  while(cc.y !== c2.y) {
-    commands.push(new command.SMove(new Coord(0, Math.sign(c2.y - cc.y), 0)))
-    cc.y += Math.sign(c2.y - cc.y)
+  if(!isBack) {
+    while (cc.y !== c2.y) {
+      commands.push(new command.SMove(new Coord(0, Math.sign(c2.y - cc.y), 0)))
+      cc.y += Math.sign(c2.y - cc.y)
+    }
   }
 
   while(cc.x !== c2.x) {
@@ -30,6 +32,13 @@ const getPath = (c1: Coord, c2: Coord) => {
   while(cc.z !== c2.z) {
     commands.push(new command.SMove(new Coord(0, 0, Math.sign(c2.z - cc.z))))
     cc.z += Math.sign(c2.z - cc.z)
+  }
+
+  if(isBack) {
+    while (cc.y !== c2.y) {
+      commands.push(new command.SMove(new Coord(0, Math.sign(c2.y - cc.y), 0)))
+      cc.y += Math.sign(c2.y - cc.y)
+    }
   }
 
   return commands
@@ -45,7 +54,7 @@ const fillSlice = (start: Coord, slice : Array) => {
 
     let path = getPath(cc, botC)
     //console.log(path)
-    commands.push(path)
+    commands = commands.concat(path)
     cc = botC
     commands.push(new command.Fill(new Coord(0, -1, 0)))
   }
@@ -69,10 +78,13 @@ const solve = (targetMatrix : Matrix) => {
 
     //console.log(state.getBot(1).pos)
     trace.execCommands(fillSlice(state.getBot(1).pos, slice))
+
   }
 
   let origin = new Coord(0, 0, 0)
-  trace.execCommands(getPath(state.getBot(1).pos, origin))
+
+  console.log(state.getBot(1).pos)
+  trace.execCommands(getPath(state.getBot(1).pos, origin, true))
 
   trace.execCommand(new command.Flip())
   trace.execCommand(new command.Halt())

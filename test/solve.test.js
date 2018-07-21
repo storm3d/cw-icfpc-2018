@@ -6,5 +6,5 @@ test("solve", () => {
 
   let solution = solve(m)
 
-  expect(solution.commands.length).toBe(1025)
+  expect(solution.commands.length).toBe(1564)
 });
