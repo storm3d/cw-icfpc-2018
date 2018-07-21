@@ -14,31 +14,28 @@ const traceName = (num: string) => {
 
 const exec = (inputFolder: string, outputFolder: string, num: string) => {
     let modelFileName = "./" + inputFolder + "/" + modelName(num);
-    console.log(modelFileName);
+    // console.log(modelFileName);
     const m = readModel(modelFileName);
 
     let solution = solve(m);
     let dump = serializeTrace(solution.commands);
 
+    // console.log(dump)
+
     // TODO: now write the solution
 
     let traceFileName = "./" + outputFolder + "/" + traceName(num);
-    console.log(traceFileName);
+    // console.log(traceFileName);
     fs.writeFile(traceFileName, dump, err => {
             if (err) {
                 console.log(err);
-                return;
             }
 
-            console.log("The file was saved!")
+            // console.log("The file was saved!")
         }
     )
 
 };
-
-process.argv.forEach((val, index, array) => {
-    console.log(index + ': ' + val);
-});
 
 if (process.argv.length > 2 && process.argv[2] !== "--watchAll") {
     exec(process.argv[2], process.argv[3], process.argv[4])
