@@ -20,6 +20,49 @@ class Coord {
   getAdded(v: Coord) {
     return new Coord(this.x + v.x, this.y + v.y, this.z + v.z)
   }
+
+  getDiff(v: Coord) {
+    return new Coord(v.x - this.x, v.y - this.y, v.z - this.z)
+  }
+
+  getMlen() {
+    return Math.abs(this.x) + Math.abs(this.y) + Math.abs(this.z)
+  }
+
+  getClen() {
+    return Math.max(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z))
+  }
+
+  isAdjacent(c: Coord) {
+    let diff = this.getDiff(c)
+    return diff.getMlen() === 1
+  }
+
+  isLinearDiff() {
+    return this.getMlen() == this.getClen() && this.getMlen() > 0
+  }
+
+  isShortLinearDiff() {
+    return this.isLinearDiff() && this.getMlen() <= 5
+  }
+
+  isLongLinearDiff() {
+    return this.isLinearDiff() && this.getMlen() <= 15
+  }
+
+  isNearCoordDiff() {
+    return this.getMlen() <= 2 && this.getClen() == 1
+  }
+}
+
+class Region {
+  constructor(c1: Coord, c2: Coord) {
+    this.c1 = c1
+    this.c2 = c2
+  }
+
+  getDim() {
+  }
 }
 
 class Matrix {
@@ -47,6 +90,10 @@ class Matrix {
   coord2index(x, y, z) {
     return x + this.r * y + this.r * this.r * z;
   }
+
+  isValidCoord(c : Coord) {
+    return c.x >= 0 && c.y >= 0 && c.z >=0 && c.x < this.r && c.y < this.r && c.z < this.r
+  }
 }
 
 class Bot {
@@ -70,4 +117,4 @@ class State {
   }
 }
 
-export { Coord, Matrix, Bot, State };
+export { Coord, Region, Matrix, Bot, State };

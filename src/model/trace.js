@@ -46,12 +46,21 @@ export class Fission {
 
 export class Fill {
   constructor(nd : Coord) {
+    if(!nd.isNearCoordDiff())
+      throw "Not a nd"
     this.nd = nd;
   }
 
   run(state : State, bid : number) {
+
     let bot = state.bots[bid]
+    if(!bot)
+      throw "Bot not found"
+
     let c = bot.pos.getAdded(this.nd)
+    if(!state.matrix.isValidCoord(c))
+      throw "Not valid coord"
+
     state.matrix.fill(c)
   }
 }
