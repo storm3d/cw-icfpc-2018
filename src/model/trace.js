@@ -7,7 +7,19 @@ export class Trace {
 }
 
 export class Halt {
-  run(state : State, bid : number) {}
+  run(state : State, bid : number) {
+    let bot = state.getBot(bid)
+
+    if(bot.pos.x !== 0 || bot.pos.y !== 0 || bot.pos.z !== 0)
+      throw "Not in origin"
+
+    if(state.getBotsNum() !== 1)
+      throw "Not only bot"
+
+    if(state.harmonics !== 0)
+      throw "Not low harmonics"
+
+  }
 }
 
 export class Wait {
@@ -15,7 +27,9 @@ export class Wait {
 }
 
 export class Flip {
-  run(state : State, bid : number) {}
+  run(state : State, bid : number) {
+    state.harmonics = state.harmonics === 1 ? 0 : 1
+  }
 }
 
 export class SMove {
@@ -53,8 +67,6 @@ export class Fill {
 
   run(state : State, bid : number) {
     let bot = state.getBot(bid)
-
-
     let c = bot.pos.getAdded(this.nd)
     if(!state.matrix.isValidCoord(c))
       throw "Not valid coord"

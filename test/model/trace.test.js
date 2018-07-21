@@ -9,9 +9,21 @@ describe('command ', () => {
     let matrix = new Matrix(2)
     let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x+=2))
     state = new State(matrix, bot)
-  });
+  })
 
-  it(" Fill should work", () => {
+  it("Halt should work", () => {
+    const halt = new trace.Halt()
+    halt.run(state, 1)
+  })
+
+  it("Flip should work", () => {
+    expect(state.harmonics).toBe(0)
+    const flip = new trace.Flip()
+    flip.run(state, 1)
+    expect(state.harmonics).toBe(1)
+  })
+
+  it("Fill should work", () => {
 
     const nd = new Coord(1, 0, 0)
     const fill = new trace.Fill(nd)
@@ -39,6 +51,6 @@ describe('command ', () => {
       fill2.run(state, 2)
     }).toThrowError("Bot not found")
 
-  });
+  })
 
 })
