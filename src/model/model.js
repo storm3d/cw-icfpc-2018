@@ -80,8 +80,24 @@ class Region {
     this.c2 = c2
   }
 
+  isEqual(r: Region) {
+    return this.c1.isEqual(r.c1) && this.c2.isEqual(r.c2)
+  }
+
   getDim() {
-    throw "unsupported";
+    return this.c1.x === this.c2.x ? 0 : 1 + this.c1.y === this.c2.y ? 0 : 1 + this.c1.z === this.c2.z ? 0 : 1
+  }
+
+  isIntersects(r: Region) {
+    // TODO
+    /*
+    if(pBox1->xyz1.x > pBox2->xyz2.x) return false;
+    if(pBox1->xyz1.y > pBox2->xyz2.y) return false;
+    if(pBox1->xyz1.z > pBox2->xyz2.z) return false;
+    if(pBox1->xyz2.x < pBox2->xyz1.x) return false;
+    if(pBox1->xyz2.y < pBox2->xyz1.y) return false;
+    if(pBox1->xyz2.z < pBox2->xyz1.z) return false;
+     */
   }
 }
 
@@ -138,6 +154,7 @@ class State {
   harmonics: number;
   matrix: Matrix;
   bots: any;
+  volatile: any;
 
   constructor(matrix: Matrix, bot: Bot) {
     this.energy = 0;
@@ -174,6 +191,16 @@ class State {
       this.spendEnergy(3*r*r*r)
 
     this.spendEnergy(20*this.getBotsNum())
+
+    // TODO clear regions
+  }
+
+  verifyRegion(r: Region) {
+   // TODO
+  }
+
+  addRegion(r: Region) {
+    // TODO
   }
 }
 
