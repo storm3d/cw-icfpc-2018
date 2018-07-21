@@ -31,7 +31,7 @@ const exec = (inputFolder: string, outputFolder: string, num: string) => {
                 console.log(err);
             }
 
-            // console.log("The file was saved!")
+            console.log("The file was saved!")
         }
     )
 
