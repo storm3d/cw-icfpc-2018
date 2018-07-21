@@ -1,4 +1,5 @@
-import { Coord, Matrix, Bot, State } from "../../src/model/model";
+import { Coord, Matrix, Bot, State, Region } from "../../src/model/model";
+import assert from 'assert';
 
 test("Coord", () => {
   const c = new Coord(1, 2, 3);
@@ -92,4 +93,28 @@ test("State", () => {
   state.doEnergyTick()
   expect(state.energy).toBe(8*3+20 + 8*30+20)
 
+});
+
+test("Region", () => {
+  let region1 = new Region(new Coord(0, 1, 1), new Coord(0, 1, 2));
+  let region2 = new Region(new Coord(3, 1, 1), new Coord(5, 1, 1));
+  let region3 = new Region(new Coord(4, 1, 1), new Coord(4, 1, 2));
+  let region4 = new Region(new Coord(4, 1, 1), new Coord(4, 1, 2));
+
+  assert.deepEqual(region3, region4);
+
+  expect(region1.isEqual(region4)).toBe(false);
+  expect(region3.isEqual(region4)).toBe(true);
+
+  expect(region1.isIntersects(region2)).toBe(false);
+  expect(region2.isIntersects(region3)).toBe(true);
+
+  let matrix = new Matrix(2)
+  let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x+=2))
+  let state = new State(matrix, bot)
+  state.addRegion(region1);
+  assert.deepEqual(state.volatile[0], region1);
+
+  state.doEnergyTick();
+  assert.deepEqual(state.volatile, []);
 });

@@ -89,15 +89,13 @@ class Region {
   }
 
   isIntersects(r: Region) {
-    // TODO
-    /*
-    if(pBox1->xyz1.x > pBox2->xyz2.x) return false;
-    if(pBox1->xyz1.y > pBox2->xyz2.y) return false;
-    if(pBox1->xyz1.z > pBox2->xyz2.z) return false;
-    if(pBox1->xyz2.x < pBox2->xyz1.x) return false;
-    if(pBox1->xyz2.y < pBox2->xyz1.y) return false;
-    if(pBox1->xyz2.z < pBox2->xyz1.z) return false;
-     */
+    if(this.c1.x > r.c1.x && this.c2.x > r.c1.x && this.c1.x > r.c2.x && this.c2.x > r.c2.x) return false;
+    if(this.c1.x < r.c1.x && this.c2.x < r.c1.x && this.c1.x < r.c2.x && this.c2.x < r.c2.x) return false;
+    if(this.c1.y > r.c1.y && this.c2.y > r.c1.y && this.c1.y > r.c2.y && this.c2.y > r.c2.y) return false;
+    if(this.c1.y < r.c1.y && this.c2.y < r.c1.y && this.c1.y < r.c2.y && this.c2.y < r.c2.y) return false;
+    if(this.c1.z > r.c1.z && this.c2.z > r.c1.z && this.c1.z > r.c2.z && this.c2.z > r.c2.z) return false;
+    if(this.c1.z < r.c1.z && this.c2.z < r.c1.z && this.c1.z < r.c2.z && this.c2.z < r.c2.z) return false;
+    return true;
   }
 }
 
@@ -162,6 +160,7 @@ class State {
     this.matrix = matrix;
     this.bots = {};
     this.bots[1] = bot;
+    this.volatile = [];
   }
 
   getBotsNum() {
@@ -192,15 +191,20 @@ class State {
 
     this.spendEnergy(20*this.getBotsNum())
 
-    // TODO clear regions
+    this.volatile = [];
   }
 
   verifyRegion(r: Region) {
-   // TODO
+    for (let i = this.volatile.length - 1; i >= 0; i--) {
+      if (r.isIntersects(this.volatile[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 
   addRegion(r: Region) {
-    // TODO
+    this.volatile.push(r);
   }
 }
 

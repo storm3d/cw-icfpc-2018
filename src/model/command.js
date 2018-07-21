@@ -1,5 +1,5 @@
 // @flow
-import { Coord, State } from "./model";
+import { Coord, State, Region } from "./model";
 
 export class Trace {
   state: State;
@@ -202,6 +202,19 @@ export class Fill {
     let c = bot.pos.getAdded(this.nd)
     if (!state.matrix.isValidCoord(c))
       throw "Not valid coord"
+    if (state.bots.length > 1) {
+      if (!bot.pos.isAdjacent(c) && state.verifyRegion(new Region(bot.pos, c))) {
+        state.addRegion(new Region(bot.pos, c));
+      } else if (bot.pos.isAdjacent(c) && state.verifyRegion(new Region(bot.pos, bot.pos)) &&
+      state.verifyRegion(new Region(c, c))) {
+        state.addRegion(new Region(bot.pos, bot.pos));
+        state.addRegion(new Region(c, c));
+      } else {
+        let err = new Error("Regions Intersection");
+        err.code = 403;
+        throw err;
+      }
+    }
 
     let isAlreadyFilled = state.matrix.isFilled(c.x, c.y, c.z)
     state.matrix.fill(c.x, c.y, c.z)
