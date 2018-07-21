@@ -25,7 +25,7 @@ export class Halt {
 
   }
 
-  toSting() : string {
+  toString() : string {
 
   }
 }
@@ -35,7 +35,7 @@ export class Wait {
     // nothing to do here!
   }
 
-  toSting() : string {
+  toString() : string {
   }
 }
 
@@ -44,7 +44,7 @@ export class Flip {
     state.harmonics = state.harmonics === 1 ? 0 : 1
   }
 
-  toSting() : string {
+  toString() : string {
   }
 }
 
@@ -68,7 +68,7 @@ export class SMove {
     state.spendEnergy(this.lld.getMlen()*2)
   }
 
-  toSting() : string {
+  toString() : string {
   }
 }
 
@@ -98,7 +98,7 @@ export class LMove {
     state.spendEnergy((this.sld1.getMlen() + 2 + this.sld2.getMlen())*2)
   }
 
-  toSting() : string {
+  toString() : string {
   }
 }
 
@@ -109,7 +109,7 @@ export class FusionP {
 
   run(state : State, bid : number) { throw "unsupported" }
 
-  toSting() : string {
+  toString() : string {
   }
 
 }
@@ -121,7 +121,7 @@ export class FusionS {
 
   run(state : State, bid : number) { throw "unsupported" }
 
-  toSting() : string {
+  toString() : string {
   }
 
 }
@@ -134,7 +134,7 @@ export class Fission {
 
   run(state : State, bid : number) {}
 
-  toSting() : string {
+  toString() : string {
   }
 }
 
@@ -157,7 +157,7 @@ export class Fill {
     state.spendEnergy(isAlreadyFilled ? 6 : 12)
   }
 
-  toSting() : string {
+  toString() : string {
   }
 }
 
