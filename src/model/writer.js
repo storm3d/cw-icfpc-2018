@@ -1,10 +1,12 @@
-import { Fill, Fission, Flip, FusionP, FusionS, Halt, LMove, SMove, Wait } from "./command";
+// @flow
+
+import { Fill, Fission, Flip, FusionP, FusionS, Halt, LMove, SMove, Wait, Void, GFill, GVoid } from "./command";
 import { Coord } from "./model";
 
 
-const serSld: { axis: number, i: number } = (c: Coord) => {
-  if (c.getMlen(c) > 5)
-    throw `invalid short linear distance ${c}`;
+const serSld = (c: Coord) : { axis: number, i: number } => {
+  if (c.getMlen() > 5)
+    throw `invalid short linear distance ${c.toString()}`;
 
   if (c.x !== 0 && c.y === 0 && c.z === 0)
     return { axis: 1, i: c.x + 5 };
@@ -15,12 +17,12 @@ const serSld: { axis: number, i: number } = (c: Coord) => {
   if (c.x === 0 && c.y === 0 && c.z !== 0)
     return { axis: 3, i: c.z + 5 };
 
-  throw `invalid short linear distance ${c}`;
+  throw `invalid short linear distance ${c.toString()}`;
 };
 
-const serLld: { axis: number, i: number } = (c: Coord) => {
-  if (c.getMlen(c) > 15)
-    throw `invalid long linear distance ${c}`;
+const serLld = (c: Coord) : { axis: number, i: number } => {
+  if (c.getMlen() > 15)
+    throw `invalid long linear distance ${c.toString()}`;
 
   if (c.x !== 0 && c.y === 0 && c.z === 0)
     return { axis: 1, i: c.x + 15 };
@@ -31,10 +33,10 @@ const serLld: { axis: number, i: number } = (c: Coord) => {
   if (c.x === 0 && c.y === 0 && c.z !== 0)
     return { axis: 3, i: c.z + 15 };
 
-  throw `invalid long linear distance ${c}`;
+  throw `invalid long linear distance ${c.toString()}`;
 };
 
-const serFd: [ number ] = (c: Coord) => {
+const serFd = (c: Coord) : Array<number> => {
   if (c.x > 30 || c.x < -30)
     throw `invalid far distance x : ${c.x}`;
   if (c.y > 30 || c.y < -30)
@@ -45,15 +47,15 @@ const serFd: [ number ] = (c: Coord) => {
   return [c.x + 30, c.y + 30, c.z + 30];
 };
 
-const serNd: number = (c: Coord) => {
+const serNd = (c: Coord) : number => {
   const mlen = c.getMlen();
   if (mlen === 0 || mlen > 2)
-    throw `invalid near coordinate difference ${c}`;
+    throw `invalid near coordinate difference ${c.toString()}`;
 
   return (c.x + 1) * 9 + (c.y + 1) * 3 + c.z + 1;
 };
 
-export const serializeTrace = (trace: [Any]) => {
+export const serializeTrace = (trace: Array<any>) : Uint8Array => {
 
   const buffer = new Uint8Array(trace.length * 3);
 

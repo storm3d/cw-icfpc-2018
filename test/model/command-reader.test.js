@@ -1,6 +1,6 @@
 import { sld, lld, nd, readTrace } from "../../src/model/reader";
 import { coord, Coord } from "../../src/model/model";
-import { Flip, SMove } from "../../src/model/command";
+import { Flip, SMove, Halt } from "../../src/model/command";
 
 describe("read command", () => {
 
@@ -50,4 +50,27 @@ describe("read command", () => {
     // for (let i = 0; i < 20; i++)
     //   console.log(trace[i]);
   });
+
+  test("read small full trace file", () => {
+
+    const trace = readTrace("./dfltTracesF/FA001.nbt");
+
+    expect(trace.length).toBe(1398);
+
+    expect(trace[0]).toEqual(new Flip());
+    expect(trace[1]).toEqual(new SMove(coord(0, 0, 1)));
+    expect(trace[2]).toEqual(new SMove(coord(0, 0, 1)));
+    expect(trace[3]).toEqual(new SMove(coord(0, 0, 1)));
+    expect(trace[4]).toEqual(new SMove(coord(0, 0, 1)));
+    expect(trace[5]).toEqual(new SMove(coord(0, 0, 1)));
+    expect(trace[6]).toEqual(new SMove(coord(0, 0, 1)));
+    expect(trace[7]).toEqual(new SMove(coord(0, 1, 0)));
+    expect(trace[8]).toEqual(new SMove(coord(1, 0, 0)));
+    expect(trace[9]).toEqual(new SMove(coord(0, 0, 1)));
+
+
+    expect(trace[trace.length-2]).toEqual(new Flip());
+    expect(trace[trace.length-1]).toEqual(new Halt());
+  });
+
 });

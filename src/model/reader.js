@@ -1,8 +1,10 @@
+// @flow
+
 import fs from "fs";
 import { Matrix, Coord, coord } from "./model";
-import { Fill, Fission, Flip, FusionP, FusionS, Halt, LMove, SMove, Wait } from "./command";
+import { Fill, Fission, Flip, FusionP, FusionS, Halt, LMove, SMove, Wait, Void, GFill, GVoid } from "./command";
 
-export function readModel(file): Matrix {
+export function readModel(file: string): Matrix {
   const data = fs.readFileSync(file);
   const r = data[0];
 
@@ -25,7 +27,7 @@ export function readModel(file): Matrix {
   return m;
 }
 
-export const sld: Coord = (axis: number, i: number) => {
+export const sld = (axis: number, i: number) : Coord => {
   const d = i - 5;
 
   if (d === 0 || d > 5 || d < -5)
@@ -43,7 +45,7 @@ export const sld: Coord = (axis: number, i: number) => {
   }
 };
 
-export const lld: Coord = (axis: number, i: number) => {
+export const lld = (axis: number, i: number) : Coord => {
   const d = i - 15;
 
   if (d === 0 || d > 15 || d < -15)
@@ -61,7 +63,7 @@ export const lld: Coord = (axis: number, i: number) => {
   }
 };
 
-export const nd: Coord = (byte: number) => {
+export const nd = (byte: number) : Coord => {
   const dx = Math.floor(byte / 9) - 1;
   const dy = Math.floor((byte - (dx + 1) * 9) / 3) - 1;
   const dz = byte - ((dx + 1) * 9 + (dy + 1) * 3) - 1;
@@ -72,12 +74,13 @@ export const nd: Coord = (byte: number) => {
 
   return coord(dx, dy, dz);
 };
-export const fd: Coord = (byte0: number, byte1: number, byte2: number) => {
-  if (byte0 > (30 + 30))
+
+export const fd = (byte0: number, byte1: number, byte2: number) : Coord => {
+  if (byte0 > (30 + 30) || byte0 < 0)
     throw `Invalid far coordinate distance encoded in byte ${byte0}`;
-  if (byte1 > (30 + 30))
+  if (byte1 > (30 + 30) || byte1 < 0)
     throw `Invalid far coordinate distance encoded in byte ${byte1}`;
-  if (byte2 > (30 + 30))
+  if (byte2 > (30 + 30) || byte2 < 0)
     throw `Invalid far coordinate distance encoded in byte ${byte2}`;
 
   const dx = byte0 - 30;
@@ -86,7 +89,7 @@ export const fd: Coord = (byte0: number, byte1: number, byte2: number) => {
   return coord(dx, dy, dz);
 };
 
-export const readTrace: [Any] = (file) => {
+export const readTrace = (file: string) : Array<any> => {
 
   const data = fs.readFileSync(file);
 
