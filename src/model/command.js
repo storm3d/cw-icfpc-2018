@@ -10,9 +10,9 @@ export class Trace {
     this.commands.push(c)
   }
 
-  execCommands(arr : Array) {
-    for(c of arr) {
-      execCommand(c)
+  execCommands(arr: Array) {
+    for(let c of arr) {
+      this.execCommand(c)
     }
   }
 }
