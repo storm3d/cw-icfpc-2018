@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 privateID=e196b3421b5141ed8763a5837d0612ed
 timestamp=$(date +"%H%M%S")
