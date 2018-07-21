@@ -13,4 +13,13 @@ describe("write command", () => {
     expect(dump).toEqual(Uint8Array.from(fs.readFileSync(file)));
   });
 
+  test("read-write full trace", () => {
+
+    const file = "./dfltTracesF/FA001.nbt";
+    const trace = readTrace(file);
+    const dump = serializeTrace(trace);
+
+    expect(dump).toEqual(Uint8Array.from(fs.readFileSync(file)));
+  });
+
 });
