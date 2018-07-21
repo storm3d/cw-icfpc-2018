@@ -52,16 +52,17 @@ export class Fill {
   }
 
   run(state : State, bid : number) {
+    let bot = state.getBot(bid)
 
-    let bot = state.bots[bid]
-    if(!bot)
-      throw "Bot not found"
 
     let c = bot.pos.getAdded(this.nd)
     if(!state.matrix.isValidCoord(c))
       throw "Not valid coord"
 
+    let isAlreadyFilled = state.matrix.isFilled(c)
     state.matrix.fill(c)
+
+    state.spendEnergy(isAlreadyFilled ? 6 : 12)
   }
 }
 

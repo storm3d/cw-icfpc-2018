@@ -115,6 +115,20 @@ class State {
   getBotsNum() {
     return Object.keys(this.bots).length
   }
+
+  getBot(bid : number) {
+    if(!this.bots[bid])
+      throw "Bot not found"
+    return this.bots[bid]
+  }
+
+  spendEnergy(energy) {
+    this.energy+=energy
+  }
+
+  getEnergy() {
+    return this.energy
+  }
 }
 
 export { Coord, Region, Matrix, Bot, State };

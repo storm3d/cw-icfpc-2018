@@ -15,7 +15,12 @@ describe('command ', () => {
 
     const nd = new Coord(1, 0, 0)
     const fill = new trace.Fill(nd)
+
+    expect(state.getEnergy()).toBe(0)
     fill.run(state, 1)
+    expect(state.getEnergy()).toBe(12)
+    fill.run(state, 1)
+    expect(state.getEnergy()).toBe(12+6)
 
     expect(state.matrix.isFilled(nd)).toBe(true);
 
@@ -33,6 +38,7 @@ describe('command ', () => {
       const fill2 = new trace.Fill(new Coord(1, 0, 0))
       fill2.run(state, 2)
     }).toThrowError("Bot not found")
+
   });
 
 })
