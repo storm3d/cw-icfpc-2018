@@ -6,5 +6,9 @@ test("solve", () => {
 
   let solution = new Solver().solve(m)
 
+  // console.log(solution.toString());
+  // console.log(`Required energy: ${solution.state.energy}`);
+
 //  expect(solution.commands.length).toBe(1564)
+
 });

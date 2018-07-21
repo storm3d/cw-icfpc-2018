@@ -61,6 +61,10 @@ class Coord {
   getCopy() {
     return new Coord(this.x, this.y, this.z)
   }
+
+  toString() {
+    return `<${this.x},${this.y},${this.z}>`;
+  }
 }
 
 class Region {

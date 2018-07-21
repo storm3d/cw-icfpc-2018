@@ -18,6 +18,18 @@ export class Trace {
       this.execCommand(c)
     }
   }
+
+  toString(max) {
+
+    let n = max ? max : this.commands.length;
+
+    let result = "";
+
+    for (let i = 0; i < n; i++)
+      result += this.commands[i].toString() + "\n";
+
+    return result;
+  }
 }
 
 export class Halt {
@@ -81,7 +93,7 @@ export class SMove {
   }
 
   toString() : string {
-    return "SMove"+ "<"+c+">"
+    return `SMove ${this.lld}`;
   }
 }
 
@@ -112,7 +124,7 @@ export class LMove {
   }
 
   toString() : string {
-    return "LMove"
+    return `LMove ${this.sld1} ${this.sld2}`;
   }
 }
 
@@ -175,7 +187,7 @@ export class Fill {
   }
 
   toString() : string {
-    return "Fill"+"<"+c+">"
+    return `Fill ${this.nd}`;
   }
 }
 

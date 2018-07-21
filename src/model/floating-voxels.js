@@ -28,16 +28,8 @@ export default class FloatingVoxels {
     return this.floating.size === 0;
   }
 
-  toUfIndex(c: Coord) {
-    return this.toUfIndex(c.x, c.y, c.z);
-  }
-
   toUfIndex(x, y, z) {
     return x + y * this.r + z * this.r2;
-  }
-
-  fill(c: Coord, matrix: Matrix) {
-    return fill(c.x, c.y, c.z)
   }
 
   fill(x, y, z, matrix: Matrix) {
