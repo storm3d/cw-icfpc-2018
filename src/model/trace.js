@@ -78,7 +78,13 @@ export class LMove {
     this.sld2 = sld2;
   }
 
-  run(state : State, bid : number) {}
+  run(state : State, bid : number) {
+    let c1 = bot.pos.getAdded(this.sld1)
+    if(!state.matrix.isValidCoord(c1))
+      throw "C1 is not valid coord"
+
+    let c2 = bot.pos.getAdded(this.sld2)
+  }
 
   toSting() : string {
   }
