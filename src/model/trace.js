@@ -20,33 +20,65 @@ export class Halt {
       throw "Not low harmonics"
 
   }
+
+  toSting() : string {
+  }
 }
 
 export class Wait {
-  run(state : State, bid : number) {}
+  run(state : State, bid : number) {
+    // nothing to do here!
+  }
+
+  toSting() : string {
+  }
 }
 
 export class Flip {
   run(state : State, bid : number) {
     state.harmonics = state.harmonics === 1 ? 0 : 1
   }
+
+  toSting() : string {
+  }
 }
 
 export class SMove {
   constructor(lld : Coord) {
+    if(!lld.isLongLinearDiff())
+      throw "Not a lld"
+
     this.lld = lld;
+
   }
 
-  run(state : State, bid : number) {}
+  run(state : State, bid : number) {
+    let bot = state.getBot(bid)
+
+    let c = bot.pos.getAdded(this.lld)
+    if(!state.matrix.isValidCoord(c))
+      throw "Not valid coord"
+  }
+
+  toSting() : string {
+  }
 }
 
 export class LMove {
   constructor(sld1 : Coord, sld2 : Coord) {
+    if(!sld1.isShortLinearDiff())
+      throw "1 is not a sld"
+    if(!sld2.isShortLinearDiff())
+      throw "2 is not a sld"
+
     this.sld1 = sld1;
     this.sld2 = sld2;
   }
 
   run(state : State, bid : number) {}
+
+  toSting() : string {
+  }
 }
 
 export class Fission {
@@ -56,6 +88,9 @@ export class Fission {
   }
 
   run(state : State, bid : number) {}
+
+  toSting() : string {
+  }
 }
 
 export class Fill {
@@ -75,6 +110,9 @@ export class Fill {
     state.matrix.fill(c)
 
     state.spendEnergy(isAlreadyFilled ? 6 : 12)
+  }
+
+  toSting() : string {
   }
 }
 
