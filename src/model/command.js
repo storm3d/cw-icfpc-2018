@@ -34,7 +34,7 @@ export class Halt {
   }
 
   toString() : string {
-      "Halt"
+      return "Halt"
   }
 }
 
