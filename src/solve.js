@@ -48,7 +48,26 @@ const fillSlice = (start: Coord, slice : Array) => {
   let commands = []
   let cc = start.getCopy();
 
-  for(let c of slice) {
+  while(1) {
+
+    let bestI = undefined
+    let minD = 1255
+    for (let i = 0; i < slice.length; i++) {
+      if (!slice[i])
+        continue
+      if (Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z) < minD) {
+        bestI = i
+        minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
+      }
+    }
+
+    //console.log(bestI)
+
+    if(bestI === undefined)
+      break
+
+    let c = slice[bestI]
+    slice[bestI] = undefined
     let botC = c.getAdded(new Coord(0, 1, 0))
     //console.log(botC)
 
@@ -58,6 +77,7 @@ const fillSlice = (start: Coord, slice : Array) => {
     cc = botC
     commands.push(new command.Fill(new Coord(0, -1, 0)))
   }
+
   return commands
 }
 
@@ -83,6 +103,7 @@ const solve = (targetMatrix : Matrix) => {
 
   let origin = new Coord(0, 0, 0)
 
+  //console.log(state.getBot(1).pos)
   trace.execCommands(getPath(state.getBot(1).pos, origin, true))
 
   trace.execCommand(new command.Flip())
