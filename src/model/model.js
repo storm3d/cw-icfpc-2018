@@ -139,6 +139,17 @@ class State {
   getEnergy() {
     return this.energy
   }
+
+  doEnergyTick() {
+
+    let r = this.matrix.r
+    if(this.harmonics)
+      this.spendEnergy(30*r*r*r)
+    else
+      this.spendEnergy(3*r*r*r)
+
+    this.spendEnergy(20*this.getBotsNum())
+  }
 }
 
 export { Coord, Region, Matrix, Bot, State };

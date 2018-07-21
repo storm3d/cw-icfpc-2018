@@ -85,4 +85,11 @@ test("State", () => {
   expect(state.bots[1].seeds.length).toBe(19)
   expect(state.bots[1].seeds[0]).toBe(2)
 
+  expect(state.energy).toBe(0)
+  state.doEnergyTick()
+  expect(state.energy).toBe(8*3+20)
+  state.harmonics = 1
+  state.doEnergyTick()
+  expect(state.energy).toBe(8*3+20 + 8*30+20)
+
 });

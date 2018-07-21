@@ -9,6 +9,8 @@ export class Trace {
   execCommand(c) {
     this.commands.push(c)
     c.run(this.state, 1)
+
+    this.state.doEnergyTick()
   }
 
   execCommands(arr: Array) {
