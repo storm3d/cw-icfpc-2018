@@ -9,6 +9,9 @@ const exec = () => {
   let solution = solve(m)
 
   // TODO: now write the solution
+
+  console.log(solution.commands.length)
+  console.log(solution.commands.toString())
 };
 
 exec();

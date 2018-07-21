@@ -1,12 +1,19 @@
 import { State } from "./model";
 
 export class Trace {
-  constructor() {
+  constructor(state : State) {
+    this.state = State;
     this.commands = [];
   }
 
-  addCommand(c) {
+  execCommand(c) {
     this.commands.push(c)
+  }
+
+  execCommands(arr : Array) {
+    for(c of arr) {
+      execCommand(c)
+    }
   }
 }
 
