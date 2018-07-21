@@ -25,28 +25,35 @@ const exec = (inputFolder: string, outputFolder: string, num: string) => {
     // TODO: now write the solution
 
     let traceFileName = "./" + outputFolder + "/" + traceName(num);
-
+    console.log(traceFileName);
     fs.writeFile(traceFileName, new Buffer(dump), err => {
         if (err) {
             throw err
         } else {
+            if (process.send !== undefined) {
+                process.send(dump.length);
+            }
             return dump.length;
         }
-    });;
+    });
 
 };
 
-// process.argv.forEach((val, index, array) => {
-//     console.log(index + ': ' + val);
-// });
-
-if (process.argv.length > 2 && process.argv[2] !== "--watchAll") {
-    exec(process.argv[2], process.argv[3], process.argv[4])
-} else {
+if (process.send !== undefined) {
     exec('problemsL', "solve", "001");
 }
 
-
+process.on('message', (msg) => {
+    if (msg === 'kill') {
+        process.exit(0);
+    } else if (msg === 'ask') {
+        if (process.send !== undefined) {
+            process.send('message');
+        }
+    } else {
+        exec('problemsL', 'solve', msg);
+    }
+});
 
 module.exports = {
     exec
