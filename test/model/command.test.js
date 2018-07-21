@@ -36,7 +36,19 @@ describe('command ', () => {
 
     sm.run(state, 1)
     expect(state.getBot(1).pos.isEqual(lld)).toBe(false)
-    expect(state.getBot(1).pos.isEqual(new Coord(4, 0, 0))).toBe(true)
+    expect(state.getBot(1).pos).toEqual(new Coord(4, 0, 0))
+  })
+
+  it("LMove should work", () => {
+    expect(state.getEnergy()).toBe(0)
+    const sld1 = new Coord(2, 0, 0)
+    const sld2 = new Coord(0, 2, 0)
+    const final = new Coord(2, 2, 0)
+    const lm = new trace.LMove(sld1, sld2)
+    lm.run(state, 1)
+    expect(state.getBot(1).pos).toEqual(final)
+
+    expect(state.getEnergy()).toBe(12)
   })
 
   it("Fill should work", () => {

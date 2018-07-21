@@ -53,7 +53,7 @@ export class SMove {
 
   }
 
-  run(state : State, bid : number) {
+  run(state: State, bid: number) {
     let bot = state.getBot(bid)
 
     let c = bot.pos.getAdded(this.lld)
@@ -79,12 +79,19 @@ export class LMove {
     this.sld2 = sld2;
   }
 
-  run(state : State, bid : number) {
+  run(state: State, bid: number) {
+    let bot = state.getBot(bid)
+
     let c1 = bot.pos.getAdded(this.sld1)
     if(!state.matrix.isValidCoord(c1))
       throw "C1 is not valid coord"
 
-    let c2 = bot.pos.getAdded(this.sld2)
+    let c2 = c1.getAdded(this.sld2)
+    if(!state.matrix.isValidCoord(c2))
+      throw "C2 is not valid coord"
+
+    bot.pos = c2
+    state.spendEnergy((this.sld1.getMlen() + 2 + this.sld2.getMlen())*2)
   }
 
   toSting() : string {
