@@ -34,6 +34,17 @@ const serLld: { axis: number, i: number } = (c: Coord) => {
   throw `invalid long linear distance ${c}`;
 };
 
+const serFd: [ number ] = (c: Coord) => {
+  if (c.x > 30 || c.x < -30)
+    throw `invalid far distance x : ${c.x}`;
+  if (c.y > 30 || c.y < -30)
+    throw `invalid far distance y : ${c.y}`;
+  if (c.z > 30 || c.z < -30)
+    throw `invalid far distance z : ${c.z}`;
+
+  return [c.x + 30, c.y + 30, c.z + 30];
+};
+
 const serNd: number = (c: Coord) => {
   const mlen = c.getMlen();
   if (mlen === 0 || mlen > 2)
@@ -84,6 +95,22 @@ export const serializeTrace = (trace: [Any]) => {
     }
     else if (command instanceof Fill)
       buffer[k++] = (serNd(command.nd) << 3) + 0b011;
+    else if (command instanceof Void)
+      buffer[k++] = (serNd(command.nd) << 3) + 0b010;
+    else if (command instanceof GFill) {
+      buffer[k++] = (serNd(command.nd) << 3) + 0b001;
+      const sfd = serFd(command.fd);
+      buffer[k++] = sfd[0];
+      buffer[k++] = sfd[1];
+      buffer[k++] = sfd[2];
+    }
+    else if (command instanceof GVoid) {
+      buffer[k++] = (serNd(command.nd) << 3) + 0b000;
+      const sfd = serFd(command.fd);
+      buffer[k++] = sfd[0];
+      buffer[k++] = sfd[1];
+      buffer[k++] = sfd[2];
+    }
   }
 
   return buffer.slice(0, k);

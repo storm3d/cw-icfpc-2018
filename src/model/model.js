@@ -61,6 +61,10 @@ class Coord {
   getCopy() {
     return new Coord(this.x, this.y, this.z)
   }
+
+  toString() {
+    return `<${this.x},${this.y},${this.z}>`;
+  }
 }
 
 class Region {
@@ -85,7 +89,7 @@ class Matrix {
     this.voxels[this.coord2index(x, y, z)] = v;
   }
 
-  fill(x, y, z) {
+  fill(x: numder, y: number, z: number) {
     this.voxels[this.coord2index(x, y, z)] = 1;
   }
 
@@ -115,7 +119,7 @@ class Bot {
 }
 
 class State {
-  constructor(matrix, bot) {
+  constructor(matrix: Matrix, bot: Bot) {
     this.energy = 0;
     this.harmonics = 0;
     this.matrix = matrix;

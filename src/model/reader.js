@@ -72,6 +72,19 @@ export const nd: Coord = (byte: number) => {
 
   return coord(dx, dy, dz);
 };
+export const fd: Coord = (byte0: number, byte1: number, byte2: number) => {
+  if (byte0 > (30 + 30))
+    throw `Invalid far coordinate distance encoded in byte ${byte0}`;
+  if (byte1 > (30 + 30))
+    throw `Invalid far coordinate distance encoded in byte ${byte1}`;
+  if (byte2 > (30 + 30))
+    throw `Invalid far coordinate distance encoded in byte ${byte2}`;
+
+  const dx = byte0 - 30;
+  const dy = byte1 - 30;
+  const dz = byte2 - 30;
+  return coord(dx, dy, dz);
+};
 
 export const readTrace: [Any] = (file) => {
 
@@ -113,6 +126,24 @@ export const readTrace: [Any] = (file) => {
     }
     else if ((b1 & 0b00000111) === 0b011)
       commands.push(new Fill(nd((b1 & 0b11111000) >> 3)));
+    else if ((b1 & 0b00000111) === 0b010)
+      commands.push(new Void(nd((b1 & 0b11111000) >> 3)));
+    else if ((b1 & 0b00000111) === 0b001) {
+      const b2: number = data[pos++];
+      const b3: number = data[pos++];
+      const b4: number = data[pos++];
+      const ncd: Coord = nd((b1 & 0b11111000) >> 3);
+      const fcd: Coord = fd (b2, b3, b4);
+      commands.push(new GFill(ncd, fcd));
+    }
+    else if ((b1 & 0b00000111) === 0b000) {
+      const b2: number = data[pos++];
+      const b3: number = data[pos++];
+      const b4: number = data[pos++];
+      const ncd: Coord = nd((b1 & 0b11111000) >> 3);
+      const fcd: Coord = fd (b2, b3, b4);
+      commands.push(new GVoid(ncd, fcd));
+    }
 
   }
   return commands;
