@@ -34,7 +34,7 @@ export class Halt {
   }
 
   toString() : string {
-      "Halt"
+      return "Halt"
   }
 }
 
@@ -44,7 +44,7 @@ export class Wait {
   }
 
   toString() : string {
-    "Wait"
+    return "Wait"
   }
 }
 
@@ -54,7 +54,7 @@ export class Flip {
   }
 
   toString() : string {
-    "Flip"
+    return "Flip"
   }
 }
 
@@ -79,7 +79,7 @@ export class SMove {
   }
 
   toString() : string {
-    "SMove"+ c
+    return "SMove"+ "<"+c+">"
   }
 }
 
@@ -110,7 +110,7 @@ export class LMove {
   }
 
   toString() : string {
-    "LMove"
+    return "LMove"
   }
 }
 
@@ -122,7 +122,7 @@ export class FusionP {
   run(state : State, bid : number) { throw "unsupported" }
 
   toString() : string {
-    "FusionP"
+    return "FusionP"
   }
 
 }
@@ -135,7 +135,7 @@ export class FusionS {
   run(state : State, bid : number) { throw "unsupported" }
 
   toString() : string {
-    "FusionS"
+    return "FusionS"
   }
 
 }
@@ -149,7 +149,7 @@ export class Fission {
   run(state : State, bid : number) {}
 
   toString() : string {
-    "Fission"
+    return "Fission"
   }
 }
 
@@ -173,7 +173,7 @@ export class Fill {
   }
 
   toString() : string {
-    "Fill"+c
+    return "Fill"+"<"+c+">"
   }
 }
 
