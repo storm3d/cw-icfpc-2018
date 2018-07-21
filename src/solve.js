@@ -130,7 +130,7 @@ export default class Solver {
   solve(targetMatrix: Matrix) {
 
     let matrix = new Matrix(targetMatrix.r)
-    let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x += 2))
+    let bot = new Bot(1, new Coord(0, 0, 0), [...Array(39).keys()].map(x => x += 2))
 
     this.state = new model.State(matrix, bot);
     this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
