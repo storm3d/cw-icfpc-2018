@@ -1,6 +1,6 @@
 import fs from "fs";
 import { Matrix, Coord, coord } from "./model";
-import { Fill, Fission, Flip, FusionP, FusionS, Halt, LMove, SMove, Wait } from "./command";
+import { Fill, Fission, Flip, FusionP, FusionS, Halt, LMove, SMove, Wait, Void, GFill, GVoid } from "./command";
 
 export function readModel(file): Matrix {
   const data = fs.readFileSync(file);
