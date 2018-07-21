@@ -1,6 +1,6 @@
 import { State } from "./model";
 
-export class Trace {
+export class Command {
   constructor() {
     this.commands = [];
   }
