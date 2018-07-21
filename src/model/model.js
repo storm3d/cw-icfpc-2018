@@ -57,6 +57,10 @@ class Coord {
   isEqual(c : Coord) {
     return this.x === c.x && this.y === c.y && this.z === c.z
   }
+
+  getCopy() {
+    return new Coord(this.x, this.y, this.z)
+  }
 }
 
 class Region {

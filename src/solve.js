@@ -14,11 +14,42 @@ const getSlice = (m: Matrix, y: number) => {
 }
 
 const getPath = (c1: Coord, c2: Coord) => {
-  return []
+  let cc = c1.getCopy();
+  let commands = []
+
+  while(cc.y !== c2.y) {
+    commands.push(new command.SMove(new Coord(0, Math.sign(c2.y - cc.y), 0)))
+    cc.y += Math.sign(c2.y - cc.y)
+  }
+
+  while(cc.x !== c2.x) {
+    commands.push(new command.SMove(new Coord(Math.sign(c2.x - cc.x), 0, 0)))
+    cc.x += Math.sign(c2.x - cc.x)
+  }
+
+  while(cc.z !== c2.z) {
+    commands.push(new command.SMove(new Coord(0, 0, Math.sign(c2.z - cc.z))))
+    cc.z += Math.sign(c2.z - cc.z)
+  }
+
+  return commands
 }
 
-const fillSlice = (c: Coord, slice : Array) => {
-  return []
+const fillSlice = (start: Coord, slice : Array) => {
+  let commands = []
+  let cc = start.getCopy();
+
+  for(let c of slice) {
+    let botC = c.getAdded(new Coord(0, 1, 0))
+    //console.log(botC)
+
+    let path = getPath(cc, botC)
+    //console.log(path)
+    commands.push(path)
+    cc = botC
+    commands.push(new command.Fill(new Coord(0, -1, 0)))
+  }
+  return commands
 }
 
 const solve = (targetMatrix : Matrix) => {
@@ -36,6 +67,7 @@ const solve = (targetMatrix : Matrix) => {
     if(slice === [])
       break
 
+    //console.log(state.getBot(1).pos)
     trace.execCommands(fillSlice(state.getBot(1).pos, slice))
   }
 
