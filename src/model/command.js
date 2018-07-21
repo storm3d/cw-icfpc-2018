@@ -1,8 +1,12 @@
 import { State } from "./model";
 
-export class Command {
+export class Trace {
   constructor() {
     this.commands = [];
+  }
+
+  addCommand(c) {
+    this.commands.push(c)
   }
 }
 
