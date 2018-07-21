@@ -1,3 +1,5 @@
+// @flow
+
 import { Fill, Fission, Flip, FusionP, FusionS, Halt, LMove, SMove, Wait, Void, GFill, GVoid } from "./command";
 import { Coord } from "./model";
 

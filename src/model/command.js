@@ -1,5 +1,5 @@
 // @flow
-import { State } from "./model";
+import { Coord, State } from "./model";
 
 export class Trace {
   constructor(state: State) {
@@ -217,7 +217,7 @@ export class Void {
   }
 
   toString(): string {
-    return `Void $<{this.nd}>`
+    return `Void ${this.nd}`
   }
 }
 
@@ -232,7 +232,7 @@ export class GFill {
   }
 
   toString(): string {
-    return "GFill"
+    return `GFill ${this.nd} ${this.fd}`
   }
 
 }
@@ -248,7 +248,7 @@ export class GVoid {
   }
 
   toString(): string {
-    return "GVoid"
+    return `GVoid ${this.nd} ${this.fd}`
   }
 
 }

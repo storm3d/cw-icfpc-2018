@@ -72,12 +72,13 @@ export const nd: Coord = (byte: number) => {
 
   return coord(dx, dy, dz);
 };
+
 export const fd: Coord = (byte0: number, byte1: number, byte2: number) => {
-  if (byte0 > (30 + 30))
+  if (byte0 > (30 + 30) || byte0 < 0)
     throw `Invalid far coordinate distance encoded in byte ${byte0}`;
-  if (byte1 > (30 + 30))
+  if (byte1 > (30 + 30) || byte1 < 0)
     throw `Invalid far coordinate distance encoded in byte ${byte1}`;
-  if (byte2 > (30 + 30))
+  if (byte2 > (30 + 30) || byte2 < 0)
     throw `Invalid far coordinate distance encoded in byte ${byte2}`;
 
   const dx = byte0 - 30;
