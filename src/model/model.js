@@ -89,7 +89,7 @@ class Matrix {
     this.voxels[this.coord2index(x, y, z)] = v;
   }
 
-  fill(x: numder, y: number, z: numder) {
+  fill(x: numder, y: number, z: number) {
     this.voxels[this.coord2index(x, y, z)] = 1;
   }
 
@@ -119,7 +119,7 @@ class Bot {
 }
 
 class State {
-  constructor(matrix, bot) {
+  constructor(matrix: Matrix, bot: Bot) {
     this.energy = 0;
     this.harmonics = 0;
     this.matrix = matrix;

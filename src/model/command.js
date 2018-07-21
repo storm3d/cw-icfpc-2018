@@ -1,3 +1,4 @@
+// @flow
 import { State } from "./model";
 
 export class Trace {
