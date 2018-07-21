@@ -1,5 +1,5 @@
 import { Coord, Matrix, Bot, State } from "../../src/model/model";
-import * as trace from "../../src/model/trace";
+import * as trace from "../../src/model/command";
 
 describe('command ', () => {
 

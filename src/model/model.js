@@ -69,6 +69,8 @@ class Region {
   }
 }
 
+export const coord: Coord = (x: number, y: number, z: number) => (new Coord(x, y, z));
+
 class Matrix {
   constructor(r: number) {
     this.r = r;
