@@ -44,9 +44,11 @@ const getPath = (c1: Coord, c2: Coord, isBack = false) => {
   return commands
 }
 
-const fillSlice = (start: Coord, slice : Array) => {
+const fillSlice = (start: Coord, slice: Array, matrix: Matrix) => {
   let commands = []
   let cc = start.getCopy();
+
+  let isGrounded = false
 
   while(1) {
 
@@ -56,8 +58,17 @@ const fillSlice = (start: Coord, slice : Array) => {
       if (!slice[i])
         continue
       if (Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z) < minD) {
-        bestI = i
-        minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
+
+        //console.log(matrix.isFilled(slice[i].x, slice[i].y - 1, slice[i].z))
+        if(isGrounded) {
+          bestI = i
+          minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
+        }
+        else if(slice[i].y === 0 || matrix.isFilled(slice[i].x, slice[i].y - 1, slice[i].z)) {
+          isGrounded = true
+          bestI = i
+          minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
+        }
       }
     }
 
@@ -81,7 +92,7 @@ const fillSlice = (start: Coord, slice : Array) => {
   return commands
 }
 
-const solve = (targetMatrix : Matrix) => {
+const solve = (targetMatrix: Matrix) => {
 
   let matrix = new Matrix(targetMatrix.r)
   let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x+=2))
@@ -97,7 +108,7 @@ const solve = (targetMatrix : Matrix) => {
       break
 
     //console.log(state.getBot(1).pos)
-    trace.execCommands(fillSlice(state.getBot(1).pos, slice))
+    trace.execCommands(fillSlice(state.getBot(1).pos, slice, targetMatrix))
 
   }
 

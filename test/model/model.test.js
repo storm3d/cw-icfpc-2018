@@ -64,6 +64,8 @@ test("Matrix", () => {
 
   expect(m.isFilled(0, 0, 0)).toBe(false)
 
+  expect(m.isFilled(1, 1, 1)).toBe(false)
+
   m.fill(0, 0, 0)
   expect(m.isFilled(0, 0, 0)).toBe(true)
 
