@@ -1,16 +1,18 @@
 // @flow
 
+import { solve } from "./solve.js"
 import { readModel } from "./model/reader"
 
-/**
- * This function says hello.
- * @param name Some name to say hello for.
- * @returns The hello.
- */
-const sayHello = (name = "Haz") => `Hello, ${name}!`;
+const exec = () => {
+  const m = readModel('./problemsL/LA001_tgt.mdl')
 
-sayHello();
+  let solution = solve(m)
+
+  // TODO: now write the solution
+};
+
+exec();
 
 module.exports = {
-  sayHello
+  exec
 }

@@ -1,12 +1,12 @@
 import { Coord, Matrix, Bot, State } from "../../src/model/model";
-import * as trace from "../../src/model/trace";
+import * as trace from "../../src/model/command";
 
 describe('command ', () => {
 
   let state
 
   beforeEach(() => {
-    let matrix = new Matrix(2)
+    let matrix = new Matrix(20)
     let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x+=2))
     state = new State(matrix, bot)
   })
@@ -32,6 +32,34 @@ describe('command ', () => {
     const flip = new trace.Flip()
     flip.run(state, 1)
     expect(state.harmonics).toBe(1)
+  })
+
+  it("SMove should work", () => {
+
+    expect(state.getEnergy()).toBe(0)
+    const lld = new Coord(2, 0, 0)
+    const sm = new trace.SMove(lld)
+    sm.run(state, 1)
+    expect(state.getBot(1).pos.isEqual(lld)).toBe(true)
+
+    expect(lld.getMlen()).toBe(2)
+    expect(state.getEnergy()).toBe(4)
+
+    sm.run(state, 1)
+    expect(state.getBot(1).pos.isEqual(lld)).toBe(false)
+    expect(state.getBot(1).pos).toEqual(new Coord(4, 0, 0))
+  })
+
+  it("LMove should work", () => {
+    expect(state.getEnergy()).toBe(0)
+    const sld1 = new Coord(2, 0, 0)
+    const sld2 = new Coord(0, 2, 0)
+    const final = new Coord(2, 2, 0)
+    const lm = new trace.LMove(sld1, sld2)
+    lm.run(state, 1)
+    expect(state.getBot(1).pos).toEqual(final)
+
+    expect(state.getEnergy()).toBe(12)
   })
 
   it("Fill should work", () => {

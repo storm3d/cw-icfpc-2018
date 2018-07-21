@@ -53,6 +53,10 @@ class Coord {
   isNearCoordDiff() {
     return this.getMlen() <= 2 && this.getClen() == 1
   }
+
+  isEqual(c : Coord) {
+    return this.x === c.x && this.y === c.y && this.z === c.z
+  }
 }
 
 class Region {
@@ -64,6 +68,8 @@ class Region {
   getDim() {
   }
 }
+
+export const coord: Coord = (x: number, y: number, z: number) => (new Coord(x, y, z));
 
 class Matrix {
   constructor(r: number) {
