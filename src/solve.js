@@ -83,7 +83,6 @@ const solve = (targetMatrix : Matrix) => {
 
   let origin = new Coord(0, 0, 0)
 
-  console.log(state.getBot(1).pos)
   trace.execCommands(getPath(state.getBot(1).pos, origin, true))
 
   trace.execCommand(new command.Flip())
