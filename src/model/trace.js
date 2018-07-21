@@ -22,6 +22,7 @@ export class Halt {
   }
 
   toSting() : string {
+
   }
 }
 
@@ -82,6 +83,30 @@ export class LMove {
 
   toSting() : string {
   }
+}
+
+export class FusionP {
+  constructor(nd : Coord) {
+    this.nd = nd;
+  }
+
+  run(state : State, bid : number) { throw "unsupported" }
+
+  toSting() : string {
+  }
+
+}
+
+export class FusionS {
+  constructor(nd : Coord) {
+    this.nd = nd;
+  }
+
+  run(state : State, bid : number) { throw "unsupported" }
+
+  toSting() : string {
+  }
+
 }
 
 export class Fission {
