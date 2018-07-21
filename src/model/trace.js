@@ -58,6 +58,9 @@ export class SMove {
     let c = bot.pos.getAdded(this.lld)
     if(!state.matrix.isValidCoord(c))
       throw "Not valid coord"
+
+    bot.pos = c
+    state.spendEnergy(this.lld.getMlen()*2)
   }
 
   toSting() : string {

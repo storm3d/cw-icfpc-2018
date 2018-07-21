@@ -6,7 +6,7 @@ describe('command ', () => {
   let state
 
   beforeEach(() => {
-    let matrix = new Matrix(2)
+    let matrix = new Matrix(20)
     let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x+=2))
     state = new State(matrix, bot)
   })
@@ -21,6 +21,22 @@ describe('command ', () => {
     const flip = new trace.Flip()
     flip.run(state, 1)
     expect(state.harmonics).toBe(1)
+  })
+
+  it("SMove should work", () => {
+
+    expect(state.getEnergy()).toBe(0)
+    const lld = new Coord(2, 0, 0)
+    const sm = new trace.SMove(lld)
+    sm.run(state, 1)
+    expect(state.getBot(1).pos.isEqual(lld)).toBe(true)
+
+    expect(lld.getMlen()).toBe(2)
+    expect(state.getEnergy()).toBe(4)
+
+    sm.run(state, 1)
+    expect(state.getBot(1).pos.isEqual(lld)).toBe(false)
+    expect(state.getBot(1).pos.isEqual(new Coord(4, 0, 0))).toBe(true)
   })
 
   it("Fill should work", () => {

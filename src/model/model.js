@@ -53,6 +53,10 @@ class Coord {
   isNearCoordDiff() {
     return this.getMlen() <= 2 && this.getClen() == 1
   }
+
+  isEqual(c : Coord) {
+    return this.x === c.x && this.y === c.y && this.z === c.z
+  }
 }
 
 class Region {
