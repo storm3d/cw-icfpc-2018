@@ -14,7 +14,7 @@ const traceName = (num: string) => {
 
 const exec = (inputFolder: string, outputFolder: string, num: string) => {
     let modelFileName = "./" + inputFolder + "/" + modelName(num);
-    // console.log(modelFileName);
+    console.log(modelFileName);
     const m = readModel(modelFileName);
 
     let solution = solve(m);
@@ -25,17 +25,20 @@ const exec = (inputFolder: string, outputFolder: string, num: string) => {
     // TODO: now write the solution
 
     let traceFileName = "./" + outputFolder + "/" + traceName(num);
-    // console.log(traceFileName);
-    fs.writeFile(traceFileName, dump, err => {
-            if (err) {
-                console.log(err);
-            }
 
-            console.log("The file was saved!")
+    fs.writeFile(traceFileName, new Buffer(dump), err => {
+        if (err) {
+            throw err
+        } else {
+            return dump.length;
         }
-    )
+    });;
 
 };
+
+// process.argv.forEach((val, index, array) => {
+//     console.log(index + ': ' + val);
+// });
 
 if (process.argv.length > 2 && process.argv[2] !== "--watchAll") {
     exec(process.argv[2], process.argv[3], process.argv[4])
