@@ -200,12 +200,11 @@ export class Fill {
       if (!bot.pos.isAdjacent(c) && state.verifyRegion(new Region(bot.pos, c))) {
         state.addRegion(new Region(bot.pos, c));
       } else if (bot.pos.isAdjacent(c) && state.verifyRegion(new Region(bot.pos, bot.pos)) &&
-      state.verifyRegion(new Region(c, c))) {
+        state.verifyRegion(new Region(c, c))) {
         state.addRegion(new Region(bot.pos, bot.pos));
         state.addRegion(new Region(c, c));
       } else {
         let err = new Error("Regions Intersection");
-        err.code = 403;
         throw err;
       }
     }

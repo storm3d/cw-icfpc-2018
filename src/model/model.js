@@ -154,7 +154,7 @@ class State {
   harmonics: number;
   matrix: Matrix;
   bots: any;
-  volatile: any;
+  volatile: Array<Region>;
   isFinished: boolean
 
   constructor(matrix: Matrix, bot: Bot) {
@@ -165,7 +165,7 @@ class State {
     this.bots[1] = bot;
     this.volatile = [];
     this.isFinished = false
-    
+
   }
 
   getBotsNum() {
