@@ -155,7 +155,7 @@ class Bot {
 
   constructor(bid: number, pos: Coord, seeds: Array<number>) {
     this.bid = bid;
-    this.pos = pos;
+    this.pos = pos.getCopy();
     this.seeds = seeds;
   }
 }
@@ -167,6 +167,8 @@ class State {
   bots: any;
   volatile: Array<Region>;
   isFinished: boolean
+  fusions: any
+
 
   constructor(matrix: Matrix, bot: Bot) {
     this.energy = 0;
@@ -176,7 +178,7 @@ class State {
     this.bots[1] = bot;
     this.volatile = [];
     this.isFinished = false
-
+    this.fusions = {}
   }
 
   getBotsNum() {
@@ -187,6 +189,10 @@ class State {
     if(!this.bots[bid])
       throw "Bot not found"
     return this.bots[bid]
+  }
+
+  findBotByCoord(botCoord: Coord): Bot {
+    return Object.values(this.bots).find( b => b.pos.isEqual(botCoord));
   }
 
   spendEnergy(energy: number) {
@@ -208,6 +214,8 @@ class State {
     this.spendEnergy(20*this.getBotsNum());
 
     this.volatile = [];
+    if (Object.keys(this.fusions).length > 0)
+       throw `unmatched fusions: ${this.fusionsToString()}`
   }
 
   isFreeRegion(r: Region) {
@@ -223,6 +231,54 @@ class State {
     if(!noCheck && !this.isFreeRegion(r))
       throw "Volatile intersection"
     this.volatile.push(r);
+  }
+
+  fusionsToString(){
+    return '[' + Object.keys(this.fusions).map(i => `<${i},{this.fusions[i]}>`).join(',') + ']'
+  }
+
+  setFusionP(bidP: number, bidS: number) {
+    if (this.fusions[bidP])
+      throw `Fusion primary id already registerd: ${bidP} = ${this.fusions[bidP]}`
+    this.fusions[bidP] = 'p'
+    if (this.fusions[bidS] && this.fusions[bidS] === 's')
+        __doFusion(bidP, bidS)
+  }
+
+  setFusionS(bidP: number, bidS: number) {
+    if (this.fusions[bidS])
+      throw `Fusion secondary id already registerd: ${bidS} = ${this.fusions[bidS]}`
+    this.fusions[bidS] = 's'
+    if (this.fusions[bidP] && this.fusions[bidP] === 'p')
+        __doFusion(bidP, bidS)
+  }
+
+  __doFusion(bidP: number, bidS: number) {
+
+    // join two seed arrays and bidS, then sort it
+    let seeds = [...new Set([...this.bots[bidP].seeds , bidS, ...this.bots[bidS].seeds])]
+    seeds.sort(function(a, b){return a - b})
+    this.bots[bidP].seeds = seeds
+
+    // delete secodary bot and fusions
+    delete this.bots[bidS]
+    delete this.fusions[bidP]
+    delete this.fusions[bidS]
+
+    this.spendEnergy(24)
+  }
+
+  doFission(bid: number, m: number, c: Coord) {
+    if (!this.bots[bid])
+      throw `Invalid fission id: ${bid}`
+
+    let seeds1 = this.bots[bid].seeds
+    let seeds2 = seeds1.splice(m + 1, seeds1.length)
+    const bid2 = seeds1.shift()
+    this.bots[bid].seeds = seeds1
+    this.bots[bid2] = new Bot(bid2, c, seeds2)
+
+    this.spendEnergy(24)
   }
 }
 

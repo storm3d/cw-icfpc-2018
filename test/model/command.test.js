@@ -124,8 +124,8 @@ describe('command ', () => {
     expect(state.getBotsNum()).toBe(2)
     expect(state.getBot(2).bid).toBe(2)
 
-    expect(state.getBot(1).seeds.length).toBe(18)
-    expect(state.getBot(2).seeds.length).toBe(20)
+    expect(state.getBot(1).seeds.length).toBe(20)
+    expect(state.getBot(2).seeds.length).toBe(18)
   })
 
 })

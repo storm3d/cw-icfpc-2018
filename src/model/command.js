@@ -154,7 +154,12 @@ export class FusionP {
   }
 
   run(state: State, bid: number) {
-    throw "unsupported"
+    const bot = state.getBot(bid)
+    const c = bot.pos.getAdded(nd)
+    const botS = state.findBotByCoord(c)
+    if (!botS)
+      throw `FusionP: not found secondary bot in ${c.toString()}`
+    state.doFusionP(bid, bidS.bid);
   }
 
   toString(): string {
@@ -174,7 +179,12 @@ export class FusionS {
   }
 
   run(state: State, bid: number) {
-    throw "unsupported"
+    const bot = state.getBot(bid)
+    const c = bot.pos.getAdded(nd)
+    const botP = state.findBotByCoord(c)
+    if (!botP)
+      throw `FusionS: not found primary bot in ${c.toString()}`
+    state.doFusionS(botP.bid, bid);
   }
 
   toString(): string {
@@ -208,12 +218,8 @@ export class Fission {
     if(this.m + 1 > bot.seeds.length)
       throw `Fission: m exceeds available seeds`
 
-    let seeds = bot.seeds.splice(0, this.m + 1)
-    let childBid = seeds.splice(0, 1)[0]
 
-    state.bots[childBid] = new Bot(childBid, c, seeds)
-
-    state.spendEnergy(24)
+    state.doFission(bid, this.m, c);
   }
 
   toString(): string {
