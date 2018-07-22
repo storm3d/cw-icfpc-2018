@@ -49,7 +49,25 @@ class GoToPointBotStrategy {
        }
 
        if(!isMoved) {
-         solver.trace.execCommand(new command.Halt(), bot.bid)
+         console.log("Void!")
+         if(bot.pos.y !== this.target.y) {
+           let dir = new Coord(0, Math.sign(this.target.y - bot.pos.y), 0)
+           solver.trace.execCommand(new command.Void(dir), bot.bid)
+
+           solver.front.addPos(new Coord(bot.pos.x + dir.x, bot.pos.y + dir.y, bot.pos.z + dir.z))
+         }
+         else if(bot.pos.x !== this.target.x) {
+           let dir = new Coord(Math.sign(this.target.x - bot.pos.x), 0, 0)
+           solver.trace.execCommand(new command.Void(dir), bot.bid)
+
+           solver.front.addPos(new Coord(bot.pos.x + dir.x, bot.pos.y + dir.y, bot.pos.z + dir.z))
+         }
+         else if(!isMoved && bot.pos.z !== this.target.z) {
+           let dir = new Coord(0, 0, Math.sign(this.target.z - bot.pos.z))
+           solver.trace.execCommand(new command.Void(dir), bot.bid)
+
+           solver.front.addPos(new Coord(bot.pos.x + dir.x, bot.pos.y + dir.y, bot.pos.z + dir.z))
+         }
        }
      }
   }
@@ -57,16 +75,35 @@ class GoToPointBotStrategy {
 
 class FillNeighboursBotStrategy {
   constructor() {
+    this.exitsNum = -1
   }
 
   execute(bot: Bot, solver: MultiSolver) {
 
+    if(this.exitsNum === -1) {
+      this.exitsNum = solver.state.matrix.getFreeWalkableNeighboursNum()
+    }
+
+    let isDoneFilling = false
+
+
     let cell = solver.front.getNearPosForFill(bot.pos)
     if(cell) {
-      solver.trace.execCommand(new command.Fill(new Coord(Math.sign(cell.x - bot.pos.x), Math.sign(cell.y - bot.pos.y), Math.sign(cell.z - bot.pos.z))), bot.bid)
-      solver.front.deletePos(cell)
+      let fillDirection = new Coord(Math.sign(cell.x - bot.pos.x), Math.sign(cell.y - bot.pos.y), Math.sign(cell.z - bot.pos.z))
+
+      if(!(fillDirection.getMlen() === 1 && this.exitsNum < 2)) {
+
+        solver.trace.execCommand(new command.Fill(fillDirection), bot.bid)
+        solver.front.deletePos(cell)
+
+        if (fillDirection.getMlen() === 1)
+          this.exitsNum--
+
+        isDoneFilling= true
+      }
     }
-    else {
+
+    if(!isDoneFilling) {
       let target = solver.front.getNextPos()
 
       if(!target) {
@@ -123,7 +160,7 @@ class Front {
       if (!this.arr[i])
         continue
       let diff = new Coord(this.arr[i].x - botC.x, this.arr[i].y - botC.y, this.arr[i].z - botC.z)
-      if(diff.getMlen() <= 2 && diff.getClen() == 1 && diff.y < 0) {
+      if(diff.getMlen() <= 2 && diff.getClen() === 1 && diff.y < 0) {
         this.closestCachedI = i
         return this.arr[i];
       }
@@ -151,15 +188,18 @@ class Front {
     this.addNeighbours(c)
   }
 
+  addPos(c: Coord) {
+    this.arr.push(c)
+  }
+
   addNeighbours(c: Coord) {
-    console.log(this.arr.length)
+    //console.log(this.arr.length)
 
     for(let x = Math.max(0, c.x - 1); x <= c.x + 1; x++) {
       for (let y = Math.max(0, c.y - 1); y <= c.y + 1; y++) {
         for (let z = Math.max(0, c.z - 1); z <= c.z + 1; z++) {
           let diff = new Coord(x - c.x, y - c.y, z - c.z)
-          if (diff.getMlen() <= 1 && diff.getClen() == 1
-            && !this.matrix.isFilled(x, y, z) && this.targetMatrix.isFilled(x, y, z)) {
+          if (diff.getMlen() <= 1 && !this.matrix.isFilled(x, y, z) && this.targetMatrix.isFilled(x, y, z)) {
             let isAddedAlready = false
             for (let i = 0; i < this.arr.length; i++) {
               if (!this.arr[i])

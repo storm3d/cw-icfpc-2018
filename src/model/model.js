@@ -135,6 +135,17 @@ class Matrix {
   isValidCoord(c: Coord) {
     return c.x >= 0 && c.y >= 0 && c.z >=0 && c.x < this.r && c.y < this.r && c.z < this.r
   }
+
+  // TODO test fringe cases
+  getFreeWalkableNeighboursNum(x: number, y: number, z: number) {
+    let fn = this.isFilled(x, y - 1, z) ? 0 : 1
+    fn += this.isFilled(x, y + 1, z) ? 0 : 1
+    fn += this.isFilled(x - 1, y, z) ? 0 : 1
+    fn+= this.isFilled(x + 1, y, z) ? 0 : 1
+    fn += this.isFilled(x, y, z - 1) ? 0 : 1
+    fn += this.isFilled(x, y, z + 1) ? 0 : 1
+    return fn
+  }
 }
 
 class Bot {
