@@ -68,6 +68,8 @@
 
 <p>
 <input type="button" id="execTrace" value="Execute Trace">
+<input type="button" id="refreshModel" value="Refresh Trace">
+
 </p>
 
 </form>
@@ -111,6 +113,7 @@ var vis = null;
 
 <script src="/assets/load-file-utils.js"></script>
 
+<script src="/assets/show-model.js"></script>
 <script>
 var srcModelBData = null;
 var tgtModelBData = null;
@@ -119,8 +122,16 @@ var traceBData = null;
   var srcModelEmpty = document.getElementById('srcModelEmpty');
   var tgtModelEmpty = document.getElementById('tgtModelEmpty');
   var execTrace = document.getElementById('execTrace');
+   let refreshModel = document.getElementById('refreshModel');
+   refreshModel.onclick = () => {
+      var srcModelBData = null;
+      var tgtModelBData = null;
+      var traceBData = null;
+      loadAllFiles();
+   }
   function onStart() {
     document.getElementById('stdout').innerHTML = "";
+    loadAllFiles();
     if (vis) { vis.setSize(8, 8, 8); };
     execTrace.disabled = true;
   }
@@ -174,7 +185,6 @@ var traceBData = null;
    function(data) { traceBData = data; });
 })();
 </script>
-<script src="/assets/show-model.js"></script>
 <script src="/assets/exec-trace.js"></script>
 
 

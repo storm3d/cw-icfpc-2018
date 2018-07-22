@@ -45,4 +45,36 @@
   xmlhttp.responseType = "blob";
   xmlhttp.send();
 
+  function loadAllFiles() {
 
+    function loadTrace() {
+        xmlhttp.onreadystatechange = function(){
+        if(xmlhttp.status == 200 && xmlhttp.readyState == 4){
+          var reader = new FileReader();
+          reader.onload = function(e) {
+             traceBData = new Uint8Array(e.target.result);
+             onSuccess();
+          };
+          reader.readAsArrayBuffer(xmlhttp.response);
+          onSuccess();
+        }
+      };
+      xmlhttp.open("GET","/trace", true);
+      xmlhttp.responseType = "blob";
+      xmlhttp.send();
+    }
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function(){
+      if(xmlhttp.status == 200 && xmlhttp.readyState == 4){
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          tgtModelBData = new Uint8Array(e.target.result);
+          loadTrace();
+        };
+        reader.readAsArrayBuffer(xmlhttp.response);
+      }
+    };
+    xmlhttp.open("GET","/model",true);
+    xmlhttp.responseType = "blob";
+    xmlhttp.send();
+  }
