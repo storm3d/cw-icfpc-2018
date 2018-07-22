@@ -12,7 +12,14 @@ class FissionBotStrategy {
 
   execute(bot: Bot, solver: MultiSolver) {
     if(!solver.state.matrix.isFilled(bot.pos.x + 1, bot.pos.y, bot.pos.z)) {
-      solver.trace.execCommand(new command.Fission((new Coord(1, 0, 0)), bot.bid))
+      let childBid = bot.seeds[0];
+
+      solver.trace.execCommand(new command.Fission(new Coord(1, 0, 0), Math.floor(bot.seeds.length/2)), bot.bid);
+
+      let child = solver.state.getBot(childBid);
+
+      bot.strategy = new FillNeighboursBotStrategy();
+      child.strategy = new FillNeighboursBotStrategy();
     }
     else
       throw "Can't fission"
@@ -118,7 +125,7 @@ class FillNeighboursBotStrategy {
     }
 
     if(!isDoneFilling) {
-      let target = solver.front.getNextPos()
+      let target = solver.front.getNextTargetPos(bot.pos)
 
       if(!target) {
         target = new Coord(0, 0, 0)
@@ -155,11 +162,11 @@ class Front {
     return this.arr.length === 0
   }
 
-  getInitPosForBot() {
-    return this.arr[0].getAdded(new Coord(0, 1, 1))
+  getInitTargetPosForBot() {
+    return this.arr[Math.floor(Math.random() * this.arr.length)].getAdded(new Coord(0, 1, 1))
   }
 
-  getNextPos() {
+  getNextTargetPos(c: Coord) {
     for (let i = 0; i < this.arr.length; i++) {
       if (!this.arr[i])
         continue
@@ -255,7 +262,7 @@ export default class MultiSolver {
 
     //this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
     this.trace = new command.Trace(this.state)
-    bot.strategy = new GoToPointBotStrategy(this.front.getInitPosForBot())
+    bot.strategy = new FissionBotStrategy()
 
     while(!this.state.isFinished) {
       for(let bid in this.state.bots) {

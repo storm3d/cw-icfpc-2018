@@ -99,6 +99,10 @@ class Region {
     if(this.c1.z < r.c1.z && this.c2.z < r.c1.z && this.c1.z < r.c2.z && this.c2.z < r.c2.z) return false;
     return true;
   }
+
+  toString() {
+    return `<${this.c1},${this.c2}>`;
+  }
 }
 
 export const coord = (x: number, y: number, z: number) : Coord => (new Coord(x, y, z));

@@ -40,8 +40,8 @@ export class Halt {
     // if (bot.pos.x !== 0 || bot.pos.y !== 0 || bot.pos.z !== 0)
     //   throw "Not in origin"
 
-    if (state.getBotsNum() !== 1)
-      throw "Not only bot";
+    //if (state.getBotsNum() !== 1)
+//      throw "Not only bot";
 
     if (state.harmonics !== 0)
       throw "Not low harmonics";
@@ -93,6 +93,8 @@ export class SMove {
     let bot = state.getBot(bid)
     let c = bot.pos.getAdded(this.lld)
     state.addVolatileRegion(new Region(bot.pos, c));
+    console.log(bid)
+    console.log(new Region(bot.pos, c).toString())
 
     if (!state.matrix.isValidCoord(c))
       throw `SMove: not valid coord ${c.toString()}`;
@@ -197,6 +199,7 @@ export class Fission {
   m: number;
 
   constructor(nd: Coord, m: number) {
+    //console.log(nd)
     if (!nd.isNearCoordDiff())
       throw `Not a nd: ${nd.toString()}`
     this.nd = nd.getCopy();
