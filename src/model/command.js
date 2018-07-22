@@ -165,7 +165,7 @@ export class FusionP {
       state.addVolatileRegion(new Region(c, c));
 
       state.doFusion(bid, botS.bid)
-      this.spendEnergy(24)
+      state.spendEnergy(24)
     }
   }
 

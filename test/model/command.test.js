@@ -147,8 +147,8 @@ describe('command ', () => {
     const fission2 = new trace.Fission(nd, 2)
     fission2.run(state, 2)
     state.doEnergyTick()
-    fusionP.run(state, 1)
     fusionS.run(state, 3)
+    fusionP.run(state, 1)
     expect(()=> {
       state.doEnergyTick()
     }).toThrowError("unmatched fusions: [<1,t:p,n:2>,<3,t:s,n:2>]")
