@@ -107,12 +107,20 @@ test("Region", () => {
   let region4 = new Region(new Coord(4, 1, 1), new Coord(4, 1, 2));
   let region5 = new Region(new Coord(5, 4, 3), new Coord(3, 2, 1));
   let region6 = new Region(new Coord(3, 2, 1), new Coord(5, 4, 3));
+  let region7 = new Region(new Coord(3, 2, 1), new Coord(3, 4, 3));
 
   assert.deepEqual(region3, region4);
 
   expect(region1.isEqual(region4)).toBe(false);
   expect(region3.isEqual(region4)).toBe(true);
   expect(region5.isEqual(region6)).toBe(true);
+  expect(region1.getDim()).toBe(1);
+  expect(region2.getDim()).toBe(1);
+  expect(region3.getDim()).toBe(1);
+  expect(region4.getDim()).toBe(1);
+  expect(region5.getDim()).toBe(3);
+  expect(region6.getDim()).toBe(3);
+  expect(region7.getDim()).toBe(2);
 
   expect(region1.isIntersects(region2)).toBe(false);
   expect(region2.isIntersects(region3)).toBe(true);

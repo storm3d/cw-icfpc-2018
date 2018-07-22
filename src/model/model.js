@@ -83,7 +83,7 @@ class Region {
   }
 
   getDim() {
-    return this.c1.x === this.c2.x ? 0 : 1 + this.c1.y === this.c2.y ? 0 : 1 + this.c1.z === this.c2.z ? 0 : 1
+    return (this.c1.x === this.c2.x ? 0 : 1) + (this.c1.y === this.c2.y ? 0 : 1) + (this.c1.z === this.c2.z ? 0 : 1)
   }
 
   isIntersects(r: Region) {
