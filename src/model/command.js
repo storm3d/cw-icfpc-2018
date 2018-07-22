@@ -155,11 +155,11 @@ export class FusionP {
 
   run(state: State, bid: number) {
     const bot = state.getBot(bid)
-    const c = bot.pos.getAdded(nd)
+    const c = bot.pos.getAdded(this.nd)
     const botS = state.findBotByCoord(c)
     if (!botS)
       throw `FusionP: not found secondary bot in ${c.toString()}`
-    state.doFusionP(bid, bidS.bid);
+    state.doFusionP(bid, botS.bid);
   }
 
   toString(): string {
@@ -180,7 +180,7 @@ export class FusionS {
 
   run(state: State, bid: number) {
     const bot = state.getBot(bid)
-    const c = bot.pos.getAdded(nd)
+    const c = bot.pos.getAdded(this.nd)
     const botP = state.findBotByCoord(c)
     if (!botP)
       throw `FusionS: not found primary bot in ${c.toString()}`

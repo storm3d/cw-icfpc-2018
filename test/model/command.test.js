@@ -126,6 +126,14 @@ describe('command ', () => {
 
     expect(state.getBot(1).seeds.length).toBe(20)
     expect(state.getBot(2).seeds.length).toBe(18)
+
+    const nd2 = new Coord(-1, 0, 0)
+    const fusionP = new trace.FusionP(nd)
+    const fusionS = new trace.FusionS(nd2)
+    fusionP.run(state, 1)
+    fusionS.run(state, 2)
+    expect(state.getBotsNum()).toBe(1)
+    expect(state.getBot(1).seeds.length).toBe(39)
   })
 
 })

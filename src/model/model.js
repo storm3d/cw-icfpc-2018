@@ -237,20 +237,20 @@ class State {
     return '[' + Object.keys(this.fusions).map(i => `<${i},{this.fusions[i]}>`).join(',') + ']'
   }
 
-  setFusionP(bidP: number, bidS: number) {
+  doFusionP(bidP: number, bidS: number) {
     if (this.fusions[bidP])
       throw `Fusion primary id already registerd: ${bidP} = ${this.fusions[bidP]}`
     this.fusions[bidP] = 'p'
     if (this.fusions[bidS] && this.fusions[bidS] === 's')
-        __doFusion(bidP, bidS)
+        this.__doFusion(bidP, bidS)
   }
 
-  setFusionS(bidP: number, bidS: number) {
+  doFusionS(bidP: number, bidS: number) {
     if (this.fusions[bidS])
       throw `Fusion secondary id already registerd: ${bidS} = ${this.fusions[bidS]}`
     this.fusions[bidS] = 's'
     if (this.fusions[bidP] && this.fusions[bidP] === 'p')
-        __doFusion(bidP, bidS)
+        this.__doFusion(bidP, bidS)
   }
 
   __doFusion(bidP: number, bidS: number) {
