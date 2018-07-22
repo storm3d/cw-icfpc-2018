@@ -152,6 +152,17 @@ describe('command ', () => {
     expect(()=> {
       state.doEnergyTick()
     }).toThrowError("unmatched fusions: [<1,t:p,n:2>,<3,t:s,n:2>]")
+
+    const fusionP2 = new trace.FusionP(nd2)
+    const fusionS2 = new trace.FusionS(nd)
+    state.fusions={}
+    fusionS2.run(state, 1)
+    fusionP2.run(state, 2)
+    state.doEnergyTick()
+    fusionP2.run(state, 3)
+    fusionS2.run(state, 2)
+    state.doEnergyTick()
+    expect(state.getBot(3).seeds).toEqual([1,2].concat([...Array(37).keys()].map(x => x += 4)))
 })
 
 })
