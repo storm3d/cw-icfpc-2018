@@ -10,9 +10,11 @@ export class Trace {
     this.commands = [];
   }
 
-  execCommand(c: any, bid: number) {
+  execCommand(c: any, bid: number | void) {
     this.commands.push(c)
     c.run(this.state, bid)
+
+    this.state.doEnergyTick();
   }
 
 
@@ -31,10 +33,10 @@ export class Trace {
 
 export class Halt {
   run(state: State, bid: number) {
-    let bot = state.getBot(bid)
-
-    //if (bot.pos.x !== 0 || bot.pos.y !== 0 || bot.pos.z !== 0)
-    //  throw "Not in origin"
+    // let bot = state.getBot(bid)
+    //
+    // if (bot.pos.x !== 0 || bot.pos.y !== 0 || bot.pos.z !== 0)
+    //   throw "Not in origin"
 
     if (state.getBotsNum() !== 1)
       throw "Not only bot"
@@ -75,7 +77,7 @@ export class SMove {
 
   constructor(lld: Coord) {
     if (!lld.isLongLinearDiff())
-      throw `Not a lld: ${lld.toString()}`
+      throw `SMove: Not a lld ${lld.toString()}`
 
     this.lld = lld.getCopy();
 
@@ -86,7 +88,7 @@ export class SMove {
 
     let c = bot.pos.getAdded(this.lld)
     if (!state.matrix.isValidCoord(c))
-      throw `SMove to not valid coord: ${c.toString()}`
+      throw `SMove: not valid coord ${c.toString()}`
 
     bot.pos = c
     state.spendEnergy(this.lld.getMlen() * 2)
@@ -116,11 +118,11 @@ export class LMove {
 
     let c1 = bot.pos.getAdded(this.sld1)
     if (!state.matrix.isValidCoord(c1))
-      throw `C1 is not valid coord: ${c1.toString()}`
+      throw `LMove: C1 is not a valid coord ${c1.toString()}`
 
     let c2 = c1.getAdded(this.sld2)
     if (!state.matrix.isValidCoord(c2))
-      throw `C2 is not valid coord: ${c2.toString()}`
+      throw `LMove: C2 is not a valid coord ${c2.toString()}`
 
     bot.pos = c2
     state.spendEnergy((this.sld1.getMlen() + 2 + this.sld2.getMlen()) * 2)
@@ -203,7 +205,7 @@ export class Fill {
     let bot = state.getBot(bid)
     let c = bot.pos.getAdded(this.nd)
     if (!state.matrix.isValidCoord(c))
-      throw `Fill for not valid coord: ${c.toString()}`
+      throw `Fill: not valid coord ${c.toString()}`
     if (state.bots.length > 1) {
       if (!bot.pos.isAdjacent(c) && state.verifyRegion(new Region(bot.pos, c))) {
         state.addRegion(new Region(bot.pos, c));

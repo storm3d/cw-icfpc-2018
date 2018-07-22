@@ -88,7 +88,7 @@ describe('command ', () => {
     expect(() => {
       const fill2 = new trace.Fill(new Coord(-1, 0, 0))
       fill2.run(state, 1)
-    }).toThrowError("Fill for not valid coord: <-1,0,0>")
+    }).toThrowError("Fill: not valid coord <-1,0,0>")
 
     expect(() => {
       const fill2 = new trace.Fill(new Coord(1, 0, 0))
