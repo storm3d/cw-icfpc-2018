@@ -103,6 +103,68 @@ class Region {
 
 export const coord = (x: number, y: number, z: number) : Coord => (new Coord(x, y, z));
 
+export class Layer {
+  matrix: Matrix
+  level: number
+
+  constructor(matrix: Matrix, level: number) {
+    this.matrix = matrix;
+    this.level = level;
+  }
+
+  isFilled(x: number, z: number) {
+    return this.matrix.isFilled(x, this.level, z);
+  }
+
+  isXLineFilled(x1: number, x2: number, z: number) : boolean {
+    const m = Math.min(x1, x2);
+    const n = Math.max(x1, x2);
+
+    for (let i = m; i < n; i++)
+      if (!this.matrix.isFilled(i, this.level, z))
+        return false;
+
+    return true;
+  }
+
+  getDimension() {
+    return this.matrix.r;
+  }
+
+  getFilledVoxels(): Array<Coord> {
+    let voxels = []
+    for (let z = 0; z < this.matrix.r; z++)
+      for (let x = 0; x < this.matrix.r; x++)
+        if (this.matrix.isFilled(x, this.level, z))
+          voxels.push(coord(x, this.level, z))
+
+    return voxels
+  }
+}
+
+export const parselayer = (s: string, level: number) : Layer => {
+
+  const lines = s.split("\n").filter((line) => (line))
+  const r = lines.length
+  const matrix = new Matrix(r)
+
+  for (let z = 0; z < r; z++) {
+    const cols = lines[z].replace(/^ */, "").split(" ")
+    if (cols.length != r)
+      throw `Invalid dimensions (${r} and ${cols.length}) of Layer template ${s}`
+
+    for (let x = 0; x < r; x++) {
+      if (cols[x] !== "." && cols[x] !== "x")
+        throw `Invalid character ${cols[x]} in layer template ${s}`
+
+      matrix.set(x, level, z, cols[x] === "." ? 0 : 1)
+    }
+  }
+
+  return new Layer(matrix, level)
+}
+
+
 class Matrix {
   r: number;
   voxels: Uint8Array;
