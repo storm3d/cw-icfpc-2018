@@ -121,6 +121,7 @@ describe('command ', () => {
     const nd = new Coord(1, 0, 0)
     const fission = new trace.Fission(nd, 20)
     fission.run(state, 1)
+    state.doEnergyTick()
     expect(state.getBotsNum()).toBe(2)
     expect(state.getBot(2).bid).toBe(2)
 
@@ -139,6 +140,18 @@ describe('command ', () => {
     expect(state.getBotsNum()).toBe(1)
     expect(state.getBot(1).seeds.length).toBe(39)
     expect(state.getBot(1).seeds).toEqual([...Array(39).keys()].map(x => x += 2))
-  })
+
+    state.doEnergyTick()
+    fission.run(state, 1)
+    state.doEnergyTick()
+    const fission2 = new trace.Fission(nd, 2)
+    fission2.run(state, 2)
+    state.doEnergyTick()
+    fusionP.run(state, 1)
+    fusionS.run(state, 3)
+    expect(()=> {
+      state.doEnergyTick()
+    }).toThrowError("unmatched fusions: [<1,t:p,n:2>,<3,t:s,n:2>]")
+})
 
 })

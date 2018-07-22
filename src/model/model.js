@@ -257,8 +257,8 @@ class State {
     return this.bots[bid]
   }
 
-  findBotByCoord(botCoord: Coord): Bot {
-    return Object.values(this.bots).find( b => b.pos.isEqual(botCoord));
+  findBotByCoord(botCoord: Coord): Bot|void {
+    return Object.keys(this.bots).map(i=>this.bots[i]).find( b => b.pos.isEqual(botCoord));
   }
 
   spendEnergy(energy: number) {
@@ -293,34 +293,39 @@ class State {
     return true;
   }
 
-  addVolatileRegion(r: Region, noCheck = false) {
+  addVolatileRegion(r: Region, noCheck: boolean = false) {
     if(!noCheck && !this.isFreeRegion(r))
       throw "Volatile intersection"
     this.volatile.push(r);
   }
 
   fusionsToString(){
-    return '[' + Object.keys(this.fusions).map(i => `<${i},{this.fusions[i]}>`).join(',') + ']'
+    return '[' + Object.keys(this.fusions).map(i => `<${i},t:${this.fusions[i].t},n:${this.fusions[i].n}>`).join(',') + ']'
   }
 
   doFusionP(bidP: number, bidS: number) {
     if (this.fusions[bidP])
       throw `Fusion primary id already registerd: ${bidP} = ${this.fusions[bidP]}`
-    this.fusions[bidP] = 'p'
-    if (this.fusions[bidS] && this.fusions[bidS] === 's')
+    this.fusions[bidP] = {t:'p', n: bidS}
+    if (this.fusions[bidS])
         this.__doFusion(bidP, bidS)
   }
 
   doFusionS(bidP: number, bidS: number) {
     if (this.fusions[bidS])
       throw `Fusion secondary id already registerd: ${bidS} = ${this.fusions[bidS]}`
-    this.fusions[bidS] = 's'
-    if (this.fusions[bidP] && this.fusions[bidP] === 'p')
+    this.fusions[bidS] = {t:'s', n: bidP}
+    if (this.fusions[bidP])
         this.__doFusion(bidP, bidS)
   }
 
   __doFusion(bidP: number, bidS: number) {
-
+    if (this.fusions[bidP].t !== 'p' || this.fusions[bidP].n !== bidS)
+      throw `Fusion primary bid is incorrect: ${bidP} = <t:${this.fusions[bidP].t},n:${this.fusions[bidP].n}>`
+    if (this.fusions[bidS].t !== 's' || this.fusions[bidS].n !== bidP)
+      throw `Fusion secondary bid is incorrect: ${bidS} = <t:${this.fusions[bidS].t},n:${this.fusions[bidS].n}>`
+        
+  
     // join two seed arrays and bidS, then sort it
     let seeds = [...new Set([...this.bots[bidP].seeds , bidS, ...this.bots[bidS].seeds])]
     seeds.sort(function(a, b){return a - b})
