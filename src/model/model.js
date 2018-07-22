@@ -275,8 +275,8 @@ class State {
     let seeds1 = this.bots[bid].seeds
     let seeds2 = seeds1.splice(m + 1, seeds1.length)
     const bid2 = seeds1.shift()
-    this.bots[bid].seeds = seeds1
-    this.bots[bid2] = new Bot(bid2, c, seeds2)
+    this.bots[bid].seeds = seeds2
+    this.bots[bid2] = new Bot(bid2, c, seeds1)
 
     this.spendEnergy(24)
   }

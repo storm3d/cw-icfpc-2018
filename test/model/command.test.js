@@ -124,8 +124,12 @@ describe('command ', () => {
     expect(state.getBotsNum()).toBe(2)
     expect(state.getBot(2).bid).toBe(2)
 
-    expect(state.getBot(1).seeds.length).toBe(20)
-    expect(state.getBot(2).seeds.length).toBe(18)
+    expect(state.getBot(1).seeds.length).toBe(18)
+    expect(state.getBot(2).seeds.length).toBe(20)
+    expect(state.getBot(1).seeds[0]).toBe(23)
+    expect(state.getBot(1).seeds[17]).toBe(40)
+    expect(state.getBot(2).seeds[0]).toBe(3)
+    expect(state.getBot(2).seeds[19]).toBe(22)
 
     const nd2 = new Coord(-1, 0, 0)
     const fusionP = new trace.FusionP(nd)
@@ -134,6 +138,7 @@ describe('command ', () => {
     fusionS.run(state, 2)
     expect(state.getBotsNum()).toBe(1)
     expect(state.getBot(1).seeds.length).toBe(39)
+    expect(state.getBot(1).seeds).toEqual([...Array(39).keys()].map(x => x += 2))
   })
 
 })
