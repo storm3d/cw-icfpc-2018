@@ -4,12 +4,14 @@ import { Bot, coord, Coord, Matrix, State } from "./model/model";
 import * as command from "./model/command"
 import * as model from "./model/model"
 import FloatingVoxels from "./model/floating-voxels";
+import { FissionTask, MoveTask, Task } from "./tasks/task";
 
 export default class PlanarSolver {
 
   trace: command.Trace;
   state: State;
   floatingVoxels : FloatingVoxels;
+  botTasks: any;
 
   constructor(targetMatrix: Matrix | void) {
     if (targetMatrix) {
@@ -24,7 +26,8 @@ export default class PlanarSolver {
 
       this.state = new model.State(matrix, bot);
       this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
-      this.trace = new command.Trace(this.state)
+      this.trace = new command.Trace(this.state);
+      this.botTasks = {};
     }
   }
 
@@ -157,20 +160,6 @@ export default class PlanarSolver {
 
     this.init(targetMatrix)
 
-    for (let level = 0; level < this.state.matrix.r; level++) {
-      let slice = this.getSlice(targetMatrix, level)
-      //console.log(slice.length)
-      if (slice === [])
-        break
-
-      //console.log(state.getBot(1).pos)
-      this.fillSlice(this.state.getBot(1).pos, slice, targetMatrix)
-
-    }
-
-    let origin = new Coord(0, 0, 0)
-
-
     /*
 
     for every layer
@@ -193,26 +182,67 @@ export default class PlanarSolver {
 
      */
 
-    //
-    // while(!this.state.isFinished) {
-    //   for(let bid in this.state.bots) {
-    //     let bot = this.state.bots[bid]
-    //     bot.strategy.execute(bot, this)
-    //   }
-    //
-    //   this.state.doEnergyTick()
-    // }
-    //
+    let i = 0;
+    this.submitTask(new FissionTask());
+    this.executeStep()
 
+    this.submitTask(new FissionTask());
+    this.submitTask(new FissionTask());
+    this.executeStep()
 
-    const bid = 1;
-    this.getPath(this.state.getBot(1).pos, origin, bid, true)
+    this.submitTask(new FissionTask());
+    this.submitTask(new FissionTask());
+    this.submitTask(new FissionTask());
+    this.submitTask(new FissionTask());
+    this.executeStep()
 
-    if (this.state.harmonics !== 0 )
-      this.trace.execCommand(new command.Flip())
+    i = 0;
+    while(i++ < 200) {
+
+      // if (this.state.getBotsNum() < 10 && this.getFreeBot())
+      //   this.submitTask(fission)
+
+      // while (this.getFreeBot())
+      //   this.submitTask(move to corner)
+
+      this.executeStep()
+
+    }
+
     this.trace.execCommand(new command.Halt())
 
     return this.trace
+  }
+
+  executeStep() {
+
+    for (let bid in this.state.bots) {
+      let bot = this.state.getBot(bid);
+      if (!this.botTasks[bid] || this.botTasks[bid].isFinished()) {
+        const r = this.state.matrix.r - 1;
+        new MoveTask(coord(r, r, r), this.state.matrix).execute(this.trace, bot);
+      }
+      else {
+        this.botTasks[bid].execute(this.trace, bot);
+      }
+
+    }
+
+    this.state.doEnergyTick()
+  }
+
+  getFreeBot() : Bot | void {
+    for (let bid in this.state.bots) {
+      if (!this.botTasks[bid] || this.botTasks[bid].isFinished())
+        return this.state.getBot(bid);
+    }
+  }
+
+  submitTask(task: any) {
+    const bot = this.getFreeBot();
+
+    if (bot)
+      this.botTasks[bot.bid] = task;
   }
 
 }

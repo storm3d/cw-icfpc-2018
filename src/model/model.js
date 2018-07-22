@@ -15,14 +15,6 @@ class Coord {
     this.z = z;
   }
 
-  /*
-  addVector(v: Coord) {
-    this.x += v.x
-    this.y += v.y
-    this.z += v.z
-  }
-  */
-
   getAdded(v: Coord) {
     return new Coord(this.x + v.x, this.y + v.y, this.z + v.z)
   }
@@ -105,7 +97,7 @@ class Region {
   }
 
   toString() {
-    return `<${this.c1},${this.c2}>`;
+    return `[${this.c1.toString()},${this.c2.toString()}]`;
   }
 }
 
@@ -307,7 +299,7 @@ class State {
 
   addVolatileRegion(r: Region, noCheck: boolean = false) {
     if(!noCheck && !this.isFreeRegion(r))
-      throw "Volatile intersection"
+      throw new Error("Volatile intersection")
     this.volatile.push(r);
   }
 

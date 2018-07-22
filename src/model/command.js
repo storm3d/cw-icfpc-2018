@@ -31,7 +31,7 @@ export class Trace {
 
 export class Halt {
   run(state: State, bid: number) {
-    let bot = state.getBot(bid);
+    // let bot = state.getBot(bid);
 
     //
     // if (bot.pos.x !== 0 || bot.pos.y !== 0 || bot.pos.z !== 0)
