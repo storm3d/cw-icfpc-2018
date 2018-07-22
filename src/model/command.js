@@ -161,7 +161,14 @@ export class FusionP {
     const botS = state.findBotByCoord(c)
     if (!botS)
       throw `FusionP: not found secondary bot in ${c.toString()}`
-    state.doFusionP(bid, botS.bid);
+
+    if (state.checkFusionP(bid, botS.bid)) {
+      state.addVolatileRegion(new Region(bot.pos, bot.pos));
+      state.addVolatileRegion(new Region(c, c));
+
+      state.doFusion(bid, botS.bid)
+      state.spendEnergy(24)
+    }
   }
 
   toString(): string {
@@ -186,7 +193,14 @@ export class FusionS {
     const botP = state.findBotByCoord(c)
     if (!botP)
       throw `FusionS: not found primary bot in ${c.toString()}`
-    state.doFusionS(botP.bid, bid);
+
+    if (state.checkFusionS(botP.bid, bid)) {
+      state.addVolatileRegion(new Region(bot.pos, bot.pos));
+      state.addVolatileRegion(new Region(c, c));
+
+      state.doFusion(botP.bid, bid)
+      state.spendEnergy(24)
+    }
   }
 
   toString(): string {
@@ -223,6 +237,8 @@ export class Fission {
 
 
     state.doFission(bid, this.m, c);
+    state.spendEnergy(24)
+
   }
 
   toString(): string {

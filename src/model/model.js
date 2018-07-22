@@ -303,23 +303,21 @@ class State {
     return '[' + Object.keys(this.fusions).map(i => `<${i},t:${this.fusions[i].t},n:${this.fusions[i].n}>`).join(',') + ']'
   }
 
-  doFusionP(bidP: number, bidS: number) {
+  checkFusionP(bidP: number, bidS: number) {
     if (this.fusions[bidP])
       throw `Fusion primary id already registerd: ${bidP} = ${this.fusions[bidP]}`
     this.fusions[bidP] = {t:'p', n: bidS}
-    if (this.fusions[bidS])
-        this.__doFusion(bidP, bidS)
+    return bidS in this.fusions
   }
 
-  doFusionS(bidP: number, bidS: number) {
+  checkFusionS(bidP: number, bidS: number): boolean {
     if (this.fusions[bidS])
       throw `Fusion secondary id already registerd: ${bidS} = ${this.fusions[bidS]}`
     this.fusions[bidS] = {t:'s', n: bidP}
-    if (this.fusions[bidP])
-        this.__doFusion(bidP, bidS)
+    return bidP in this.fusions
   }
 
-  __doFusion(bidP: number, bidS: number) {
+  doFusion(bidP: number, bidS: number) {
     if (this.fusions[bidP].t !== 'p' || this.fusions[bidP].n !== bidS)
       throw `Fusion primary bid is incorrect: ${bidP} = <t:${this.fusions[bidP].t},n:${this.fusions[bidP].n}>`
     if (this.fusions[bidS].t !== 's' || this.fusions[bidS].n !== bidP)
@@ -336,7 +334,6 @@ class State {
     delete this.fusions[bidP]
     delete this.fusions[bidS]
 
-    this.spendEnergy(24)
   }
 
   doFission(bid: number, m: number, c: Coord) {
@@ -348,8 +345,6 @@ class State {
     const bid2 = seeds1.shift()
     this.bots[bid].seeds = seeds2
     this.bots[bid2] = new Bot(bid2, c, seeds1)
-
-    this.spendEnergy(24)
   }
 }
 
