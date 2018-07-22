@@ -280,6 +280,10 @@ class State {
     this.spendEnergy(20*this.getBotsNum());
 
     this.volatile = [];
+    for(let bid in this.bots) {
+        this.addVolatileRegion(new Region(this.bots[bid].pos, this.bots[bid].pos), true);
+    }
+
     if (Object.keys(this.fusions).length > 0)
        throw `unmatched fusions: ${this.fusionsToString()}`
   }
@@ -322,8 +326,8 @@ class State {
       throw `Fusion primary bid is incorrect: ${bidP} = <t:${this.fusions[bidP].t},n:${this.fusions[bidP].n}>`
     if (this.fusions[bidS].t !== 's' || this.fusions[bidS].n !== bidP)
       throw `Fusion secondary bid is incorrect: ${bidS} = <t:${this.fusions[bidS].t},n:${this.fusions[bidS].n}>`
-        
-  
+
+
     // join two seed arrays and bidS, then sort it
     let seeds = [...new Set([...this.bots[bidP].seeds , bidS, ...this.bots[bidS].seeds])]
     seeds.sort(function(a, b){return a - b})

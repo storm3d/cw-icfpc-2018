@@ -11,10 +11,8 @@ export class Trace {
   }
 
   execCommand(c: any, bid: number | void) {
-    this.commands.push(c)
     c.run(this.state, bid)
-
-    this.state.doEnergyTick();
+    this.commands.push(c)
   }
 
 
@@ -35,7 +33,6 @@ export class Halt {
   run(state: State, bid: number) {
     let bot = state.getBot(bid);
 
-    state.addVolatileRegion(new Region(bot.pos, bot.pos));
     //
     // if (bot.pos.x !== 0 || bot.pos.y !== 0 || bot.pos.z !== 0)
     //   throw "Not in origin"
@@ -57,7 +54,6 @@ export class Halt {
 export class Wait {
   run(state: State, bid: number) {
     let bot = state.getBot(bid);
-    state.addVolatileRegion(new Region(bot.pos, bot.pos));
   }
 
   toString(): string {
@@ -68,7 +64,6 @@ export class Wait {
 export class Flip {
   run(state: State, bid: number) {
     let bot = state.getBot(bid)
-    state.addVolatileRegion(new Region(bot.pos, bot.pos));
 
     state.harmonics = state.harmonics === 1 ? 0 : 1
   }
@@ -92,9 +87,12 @@ export class SMove {
   run(state: State, bid: number) {
     let bot = state.getBot(bid)
     let c = bot.pos.getAdded(this.lld)
-    state.addVolatileRegion(new Region(bot.pos, c));
-    console.log(bid)
-    console.log(new Region(bot.pos, c).toString())
+
+    //console.log("SMove " + " bot=" + bid + " to " + c.toString())
+    state.addVolatileRegion(new Region(bot.pos.getAdded(
+      new Coord(Math.sign(this.lld.x), Math.sign(this.lld.y), Math.sign(this.lld.z))), c));
+
+
 
     if (!state.matrix.isValidCoord(c))
       throw `SMove: not valid coord ${c.toString()}`;
@@ -128,13 +126,13 @@ export class LMove {
     if (!state.matrix.isValidCoord(c1))
       throw `LMove: C1 is not a valid coord ${c1.toString()}`;
 
-    state.addVolatileRegion(new Region(bot.pos, c1));
+    state.addVolatileRegion(new Region(bot.pos.getAdded(new Coord(Math.sign(this.sld1.x), Math.sign(this.sld1.y), Math.sign(this.sld1.z))), c1));
 
     let c2 = c1.getAdded(this.sld2);
     if (!state.matrix.isValidCoord(c2))
       throw `LMove: C2 is not a valid coord ${c2.toString()}`;
 
-    state.addVolatileRegion(new Region(c1, c2), true);
+    state.addVolatileRegion(new Region(c1.getAdded(new Coord(Math.sign(this.sld2.x), Math.sign(this.sld2.y), Math.sign(this.sld2.z))), c2));
 
     bot.pos = c2;
     state.spendEnergy((this.sld1.getMlen() + 2 + this.sld2.getMlen()) * 2)
@@ -229,7 +227,6 @@ export class Fission {
     if(state.matrix.isFilled(c.x, c.y, c.z))
       throw `Fission: voxel is filled ${c.toString()}`
 
-    state.addVolatileRegion(new Region(bot.pos, bot.pos));
     state.addVolatileRegion(new Region(c, c));
 
     if(this.m + 1 > bot.seeds.length)
@@ -261,7 +258,6 @@ export class Fill {
     if (!state.matrix.isValidCoord(c))
       throw `Fill: not valid coord ${c.toString()}`
 
-    state.addVolatileRegion(new Region(bot.pos, bot.pos));
     state.addVolatileRegion(new Region(c, c));
 
     /*
@@ -305,7 +301,6 @@ export class Void {
     if (!state.matrix.isValidCoord(c))
       throw `Void for not valid coord: ${this.nd.toString()}`
 
-    state.addVolatileRegion(new Region(bot.pos, bot.pos));
     state.addVolatileRegion(new Region(c, c));
 
     let isAlreadyFilled = state.matrix.isFilled(c.x, c.y, c.z)
@@ -337,7 +332,6 @@ export class GFill {
   toString(): string {
     return `GFill ${this.nd.toString()} ${this.fd.toString()}`
   }
-
 }
 
 export class GVoid {
