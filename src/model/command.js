@@ -84,6 +84,10 @@ export class SMove {
 
   }
 
+  mlen() {
+    return this.lld.getMlen();
+  }
+
   run(state: State, bid: number) {
     let bot = state.getBot(bid)
     let c = bot.pos.getAdded(this.lld)
@@ -118,6 +122,10 @@ export class LMove {
 
     this.sld1 = sld1.getCopy();
     this.sld2 = sld2.getCopy();
+  }
+
+  mlen() {
+    return this.sld1.getAdded(this.sld2).getMlen();
   }
 
   run(state: State, bid: number) {

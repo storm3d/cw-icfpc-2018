@@ -1,5 +1,5 @@
 // @flow
-import { coord, Coord, Layer, Matrix, Region } from "./model";
+import { coord, Coord, Layer, Region } from "./model";
 
 
 export const findCoveringRegion = (plane: Array<Coord>, layer: Layer) : Region | void => {

@@ -3,6 +3,7 @@
 import { Bot, Coord, Matrix, State } from "./model/model";
 import * as command from "./model/command"
 import * as model from "./model/model"
+import { move } from "./model/move";
 
 // Bot strategies
 class FissionBotStrategy {
@@ -11,10 +12,10 @@ class FissionBotStrategy {
   }
 
   execute(bot: Bot, solver: MultiSolver) {
-    if(!solver.state.matrix.isFilled(bot.pos.x + 1, bot.pos.y, bot.pos.z)) {
+    if (!solver.state.matrix.isFilled(bot.pos.x + 1, bot.pos.y, bot.pos.z)) {
       let childBid = bot.seeds[0];
 
-      solver.trace.execCommand(new command.Fission(new Coord(1, 0, 0), Math.floor(bot.seeds.length/2)), bot.bid);
+      solver.trace.execCommand(new command.Fission(new Coord(1, 0, 0), Math.floor(bot.seeds.length / 2)), bot.bid);
 
       let child = solver.state.getBot(childBid);
 
@@ -34,76 +35,35 @@ class GoToPointBotStrategy {
   }
 
   execute(bot: Bot, solver: MultiSolver) {
-     if(bot.pos.isEqual(this.target)) {
-       if(solver.front.isEmpty() && bot.pos.isEqual(new Coord(0, 0, 0))) {
-         solver.trace.execCommand(new command.Halt(), bot.bid)
-       }
-       else {
-         bot.strategy = new FillNeighboursBotStrategy()
-         bot.strategy.execute(bot, solver)
-       }
-     }
-     else {
+    if (bot.pos.isEqual(this.target)) {
+      if (solver.front.isEmpty() && bot.pos.isEqual(new Coord(0, 0, 0))) {
+        solver.trace.execCommand(new command.Halt(), bot.bid)
+      }
+      else {
+        bot.strategy = new FillNeighboursBotStrategy()
+        bot.strategy.execute(bot, solver)
+      }
+    }
+    else {
 
-       let isMoved = false
-       try {
-         if (bot.pos.y !== this.target.y) {
-           let dir = Math.sign(this.target.y - bot.pos.y)
-           if (!solver.state.matrix.isFilled(bot.pos.x, bot.pos.y + dir, bot.pos.z)) {
-             solver.trace.execCommand(new command.SMove(new Coord(0, dir, 0)), bot.bid)
-             isMoved = true
-           }
-         }
 
-         if (!isMoved && bot.pos.x !== this.target.x) {
-           let dir = Math.sign(this.target.x - bot.pos.x)
-           if (!solver.state.matrix.isFilled(bot.pos.x + dir, bot.pos.y, bot.pos.z)) {
-             solver.trace.execCommand(new command.SMove(new Coord(dir, 0, 0)), bot.bid)
-             isMoved = true
-           }
-         }
+      try {
+        const torun = move(bot.pos, this.target, solver.state.matrix);
+        solver.trace.execCommand(torun, bot.bid);
+        if (torun instanceof command.Void)
+          solver.front.addPos(bot.pos.getAdded(torun.nd));
 
-         if (!isMoved && bot.pos.z !== this.target.z) {
-           let dir = Math.sign(this.target.z - bot.pos.z)
-           if (!solver.state.matrix.isFilled(bot.pos.x, bot.pos.y, bot.pos.z + dir)) {
-             solver.trace.execCommand(new command.SMove(new Coord(0, 0, dir)), bot.bid)
-             isMoved = true
-           }
-         }
-       } catch(e) {
+      } catch (e) {
 
-         //console.log("waiting " + bot.bid + " " + solver.front.arr.length)
-         solver.trace.execCommand(new command.Wait(), bot.bid)
-         isMoved = true
-         this.waitingTurns++
+        //console.log("waiting " + bot.bid + " " + solver.front.arr.length)
+        solver.trace.execCommand(new command.Wait(), bot.bid)
+        this.waitingTurns++
 
-         if(this.waitingTurns > 3)
-           bot.strategy = new FillNeighboursBotStrategy();
+        if (this.waitingTurns > 3)
+          bot.strategy = new FillNeighboursBotStrategy();
+      }
 
-       }
-
-       if(!isMoved) {
-         //console.log("Void!")
-         if(bot.pos.y !== this.target.y) {
-           let dir = new Coord(0, Math.sign(this.target.y - bot.pos.y), 0)
-           solver.trace.execCommand(new command.Void(dir), bot.bid)
-
-           solver.front.addPos(new Coord(bot.pos.x + dir.x, bot.pos.y + dir.y, bot.pos.z + dir.z))
-         }
-         else if(bot.pos.x !== this.target.x) {
-           let dir = new Coord(Math.sign(this.target.x - bot.pos.x), 0, 0)
-           solver.trace.execCommand(new command.Void(dir), bot.bid)
-
-           solver.front.addPos(new Coord(bot.pos.x + dir.x, bot.pos.y + dir.y, bot.pos.z + dir.z))
-         }
-         else if(!isMoved && bot.pos.z !== this.target.z) {
-           let dir = new Coord(0, 0, Math.sign(this.target.z - bot.pos.z))
-           solver.trace.execCommand(new command.Void(dir), bot.bid)
-
-           solver.front.addPos(new Coord(bot.pos.x + dir.x, bot.pos.y + dir.y, bot.pos.z + dir.z))
-         }
-       }
-     }
+    }
   }
 }
 
@@ -114,7 +74,7 @@ class FillNeighboursBotStrategy {
 
   execute(bot: Bot, solver: MultiSolver) {
 
-    if(this.exitsNum === -1) {
+    if (this.exitsNum === -1) {
       this.exitsNum = solver.state.matrix.getFreeWalkableNeighboursNum()
     }
 
@@ -122,10 +82,10 @@ class FillNeighboursBotStrategy {
 
 
     let cell = solver.front.getNearPosForFill(bot.pos)
-    if(cell) {
+    if (cell) {
       let fillDirection = new Coord(Math.sign(cell.x - bot.pos.x), Math.sign(cell.y - bot.pos.y), Math.sign(cell.z - bot.pos.z))
 
-      if(!(fillDirection.getMlen() === 1 && this.exitsNum < 2)) {
+      if (!(fillDirection.getMlen() === 1 && this.exitsNum < 2)) {
 
         solver.trace.execCommand(new command.Fill(fillDirection), bot.bid)
         solver.front.deletePos(cell)
@@ -133,14 +93,14 @@ class FillNeighboursBotStrategy {
         if (fillDirection.getMlen() === 1)
           this.exitsNum--
 
-        isDoneFilling= true
+        isDoneFilling = true
       }
     }
 
-    if(!isDoneFilling) {
+    if (!isDoneFilling) {
       let target = solver.front.getNextTargetPos(bot.pos)
 
-      if(!target) {
+      if (!target) {
         target = new Coord(0, 0, 0)
       }
       bot.strategy = new GoToPointBotStrategy(target)
@@ -148,7 +108,6 @@ class FillNeighboursBotStrategy {
     }
   }
 }
-
 
 
 class Front {
@@ -181,7 +140,7 @@ class Front {
 
   getNextTargetPos(c: Coord) {
 
-    if(!this.arr.length)
+    if (!this.arr.length)
       return undefined;
 
     let closestI = 0
@@ -191,7 +150,7 @@ class Front {
         continue;
 
       let diff = new Coord(this.arr[i].x - c.x, this.arr[i].y - c.y, this.arr[i].z - c.z)
-      if(diff.getMlen() < closestDist) {
+      if (diff.getMlen() < closestDist) {
         closestDist = diff.getMlen();
         closestI = i
       }
@@ -206,7 +165,7 @@ class Front {
       if (!this.arr[i])
         continue
       let diff = new Coord(this.arr[i].x - botC.x, this.arr[i].y - botC.y, this.arr[i].z - botC.z)
-      if(diff.getMlen() <= 2 && diff.getClen() === 1 && diff.y < 0) {
+      if (diff.getMlen() <= 2 && diff.getClen() === 1 && diff.y < 0) {
         this.closestCachedI = i
         return this.arr[i];
       }
@@ -215,7 +174,7 @@ class Front {
   }
 
   deletePos(c: Coord) {
-    if(this.arr[this.closestCachedI] && c.isEqual(this.arr[this.closestCachedI]))
+    if (this.arr[this.closestCachedI] && c.isEqual(this.arr[this.closestCachedI]))
       this.arr[this.closestCachedI] = 0
     else {
       for (let i = 0; i < this.arr.length; i++) {
@@ -228,7 +187,7 @@ class Front {
       }
     }
 
-    while(this.arr[0] === 0)
+    while (this.arr[0] === 0)
       this.arr.shift()
 
     this.addNeighbours(c)
@@ -241,7 +200,7 @@ class Front {
   addNeighbours(c: Coord) {
     //console.log(this.arr.length)
 
-    for(let x = Math.max(0, c.x - 1); x <= c.x + 1; x++) {
+    for (let x = Math.max(0, c.x - 1); x <= c.x + 1; x++) {
       for (let y = Math.max(0, c.y - 1); y <= c.y + 1; y++) {
         for (let z = Math.max(0, c.z - 1); z <= c.z + 1; z++) {
           let diff = new Coord(x - c.x, y - c.y, z - c.z)
@@ -289,8 +248,8 @@ export default class MultiSolver {
     this.trace = new command.Trace(this.state)
     bot.strategy = new FissionBotStrategy()
 
-    while(!this.state.isFinished) {
-      for(let bid in this.state.bots) {
+    while (!this.state.isFinished) {
+      for (let bid in this.state.bots) {
         let bot = this.state.bots[bid]
         bot.strategy.execute(bot, this)
       }

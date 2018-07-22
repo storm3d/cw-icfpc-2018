@@ -1,5 +1,9 @@
 // @flow
 
+export const clamp = (value: number, threshold: number) : number => (
+    Math.abs(value) > threshold ? Math.sign(value) * threshold : value
+);
+
 class Coord {
   x: number;
   y: number;
@@ -146,26 +150,30 @@ export class Layer {
   }
 }
 
-export const parselayer = (s: string, level: number) : Layer => {
+export const parselayer = (layer: string, level: number) : Layer => {
+  return new Layer(parsematrix(layer, level), level)
+}
 
-  const lines = s.split("\n").filter((line) => (line))
+export const parsematrix = (layer: string, level: number) : Matrix => {
+
+  const lines = layer.split("\n").filter((line) => (line))
   const r = lines.length
   const matrix = new Matrix(r)
 
   for (let z = 0; z < r; z++) {
     const cols = lines[z].replace(/^ */, "").split(" ")
     if (cols.length != r)
-      throw `Invalid dimensions (${r} and ${cols.length}) of Layer template ${s}`
+      throw `Invalid dimensions (${r} and ${cols.length}) of Layer template ${layer}`
 
     for (let x = 0; x < r; x++) {
       if (cols[x] !== "." && cols[x] !== "x")
-        throw `Invalid character ${cols[x]} in layer template ${s}`
+        throw `Invalid character ${cols[x]} in layer template ${layer}`
 
       matrix.set(x, level, z, cols[x] === "." ? 0 : 1)
     }
   }
 
-  return new Layer(matrix, level)
+  return matrix;
 }
 
 
