@@ -115,7 +115,7 @@ test("Region", () => {
   let matrix = new Matrix(2)
   let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x+=2))
   let state = new State(matrix, bot)
-  state.addRegion(region1);
+  state.addVolatileRegion(region1);
   assert.deepEqual(state.volatile[0], region1);
 
   state.doEnergyTick();

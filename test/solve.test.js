@@ -17,9 +17,9 @@ describe("solver", () => {
   })
 
   test("solve real task", () => {
-    const m = readModel('./problemsL/LA001_tgt.mdl')
+    //const m = readModel('./problemsL/LA001_tgt.mdl')
 
-    let solution = new Solver().solve(m)
+    //let solution = new Solver().solve(m)
 
     // console.log(solution.toString());
     //console.log(`Required steps: ${solution.commands.length}, energy: ${solution.state.energy}`);

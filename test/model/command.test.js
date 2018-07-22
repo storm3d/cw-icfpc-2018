@@ -21,6 +21,7 @@ describe('command ', () => {
     const halt = new trace.Halt()
     const flip = new trace.Flip()
     flip.run(state, 1)
+    state.volatile = []
     expect(()=>{
       halt.run(state, 1)
 
@@ -45,6 +46,7 @@ describe('command ', () => {
     expect(lld.getMlen()).toBe(2)
     expect(state.getEnergy()).toBe(4)
 
+    state.volatile = []
     sm.run(state, 1)
     expect(state.getBot(1).pos.isEqual(lld)).toBe(false)
     expect(state.getBot(1).pos).toEqual(new Coord(4, 0, 0))
@@ -74,6 +76,7 @@ describe('command ', () => {
     fill.run(state, 1)
     expect(state.matrix.isFilled(nd2)).toBe(false);
 
+    state.volatile = []
     expect(state.getEnergy()).toBe(12)
     fill.run(state, 1)
     expect(state.getEnergy()).toBe(12+6)
@@ -107,6 +110,7 @@ describe('command ', () => {
     expect(state.getEnergy()).toBe(12)
     expect(state.matrix.isFilled(nd.x, nd.y, nd.z)).toBe(true);
 
+    state.volatile = []
     const voidC = new trace.Void(nd)
     voidC.run(state, 1)
 

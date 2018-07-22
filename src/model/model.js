@@ -199,18 +199,18 @@ class State {
 
   doEnergyTick() {
 
-    let r = this.matrix.r
+    let r = this.matrix.r;
     if(this.harmonics)
-      this.spendEnergy(30*r*r*r)
+      this.spendEnergy(30*r*r*r);
     else
-      this.spendEnergy(3*r*r*r)
+      this.spendEnergy(3*r*r*r);
 
-    this.spendEnergy(20*this.getBotsNum())
+    this.spendEnergy(20*this.getBotsNum());
 
     this.volatile = [];
   }
 
-  verifyRegion(r: Region) {
+  isFreeRegion(r: Region) {
     for (let i = this.volatile.length - 1; i >= 0; i--) {
       if (r.isIntersects(this.volatile[i])) {
         return false;
@@ -219,7 +219,9 @@ class State {
     return true;
   }
 
-  addRegion(r: Region) {
+  addVolatileRegion(r: Region, noCheck = false) {
+    if(!noCheck && !this.isFreeRegion(r))
+      throw "Volatile intersection"
     this.volatile.push(r);
   }
 }

@@ -33,16 +33,18 @@ export class Trace {
 
 export class Halt {
   run(state: State, bid: number) {
-    // let bot = state.getBot(bid)
+    let bot = state.getBot(bid);
+
+    state.addVolatileRegion(new Region(bot.pos, bot.pos));
     //
     // if (bot.pos.x !== 0 || bot.pos.y !== 0 || bot.pos.z !== 0)
     //   throw "Not in origin"
 
     if (state.getBotsNum() !== 1)
-      throw "Not only bot"
+      throw "Not only bot";
 
     if (state.harmonics !== 0)
-      throw "Not low harmonics"
+      throw "Not low harmonics";
 
     state.isFinished = true
   }
@@ -54,7 +56,8 @@ export class Halt {
 
 export class Wait {
   run(state: State, bid: number) {
-    // nothing to do here!
+    let bot = state.getBot(bid);
+    state.addVolatileRegion(new Region(bot.pos, bot.pos));
   }
 
   toString(): string {
@@ -64,6 +67,9 @@ export class Wait {
 
 export class Flip {
   run(state: State, bid: number) {
+    let bot = state.getBot(bid)
+    state.addVolatileRegion(new Region(bot.pos, bot.pos));
+
     state.harmonics = state.harmonics === 1 ? 0 : 1
   }
 
@@ -77,7 +83,7 @@ export class SMove {
 
   constructor(lld: Coord) {
     if (!lld.isLongLinearDiff())
-      throw `SMove: Not a lld ${lld.toString()}`
+      throw `SMove: Not a lld ${lld.toString()}`;
 
     this.lld = lld.getCopy();
 
@@ -85,10 +91,11 @@ export class SMove {
 
   run(state: State, bid: number) {
     let bot = state.getBot(bid)
-
     let c = bot.pos.getAdded(this.lld)
+    state.addVolatileRegion(new Region(bot.pos, c));
+
     if (!state.matrix.isValidCoord(c))
-      throw `SMove: not valid coord ${c.toString()}`
+      throw `SMove: not valid coord ${c.toString()}`;
 
     bot.pos = c
     state.spendEnergy(this.lld.getMlen() * 2)
@@ -105,26 +112,29 @@ export class LMove {
 
   constructor(sld1: Coord, sld2: Coord) {
     if (!sld1.isShortLinearDiff())
-      throw `1 is not a sld: ${sld1.toString()}`
+      throw `1 is not a sld: ${sld1.toString()}`;
     if (!sld2.isShortLinearDiff())
-      throw `2 is not a sld: ${sld2.toString()}`
+      throw `2 is not a sld: ${sld2.toString()}`;
 
     this.sld1 = sld1.getCopy();
     this.sld2 = sld2.getCopy();
   }
 
   run(state: State, bid: number) {
-    let bot = state.getBot(bid)
-
-    let c1 = bot.pos.getAdded(this.sld1)
+    let bot = state.getBot(bid);
+    let c1 = bot.pos.getAdded(this.sld1);
     if (!state.matrix.isValidCoord(c1))
-      throw `LMove: C1 is not a valid coord ${c1.toString()}`
+      throw `LMove: C1 is not a valid coord ${c1.toString()}`;
 
-    let c2 = c1.getAdded(this.sld2)
+    state.addVolatileRegion(new Region(bot.pos, c1));
+
+    let c2 = c1.getAdded(this.sld2);
     if (!state.matrix.isValidCoord(c2))
-      throw `LMove: C2 is not a valid coord ${c2.toString()}`
+      throw `LMove: C2 is not a valid coord ${c2.toString()}`;
 
-    bot.pos = c2
+    state.addVolatileRegion(new Region(c1, c2), true);
+
+    bot.pos = c2;
     state.spendEnergy((this.sld1.getMlen() + 2 + this.sld2.getMlen()) * 2)
   }
 
@@ -192,6 +202,9 @@ export class Fission {
     if(state.matrix.isFilled(c.x, c.y, c.z))
       throw `Fission: voxel is filled ${c.toString()}`
 
+    state.addVolatileRegion(new Region(bot.pos, bot.pos));
+    state.addVolatileRegion(new Region(c, c));
+
     if(this.m + 1 > bot.seeds.length)
       throw `Fission: m exceeds available seeds`
 
@@ -222,6 +235,10 @@ export class Fill {
     let c = bot.pos.getAdded(this.nd)
     if (!state.matrix.isValidCoord(c))
       throw `Fill: not valid coord ${c.toString()}`
+
+    state.addVolatileRegion(new Region(bot.pos, bot.pos));
+    state.addVolatileRegion(new Region(c, c));
+
     /*
     if (state.bots.length > 1) {
       if (!bot.pos.isAdjacent(c) && state.verifyRegion(new Region(bot.pos, c))) {
@@ -262,6 +279,9 @@ export class Void {
     let c = bot.pos.getAdded(this.nd)
     if (!state.matrix.isValidCoord(c))
       throw `Void for not valid coord: ${this.nd.toString()}`
+
+    state.addVolatileRegion(new Region(bot.pos, bot.pos));
+    state.addVolatileRegion(new Region(c, c));
 
     let isAlreadyFilled = state.matrix.isFilled(c.x, c.y, c.z)
     state.matrix.clear(c.x, c.y, c.z)
