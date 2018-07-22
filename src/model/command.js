@@ -75,9 +75,9 @@ export class SMove {
 
   constructor(lld: Coord) {
     if (!lld.isLongLinearDiff())
-      throw "Not a lld"
+      throw `Not a lld: ${lld.toString()}`
 
-    this.lld = lld;
+    this.lld = lld.getCopy();
 
   }
 
@@ -86,7 +86,7 @@ export class SMove {
 
     let c = bot.pos.getAdded(this.lld)
     if (!state.matrix.isValidCoord(c))
-      throw "Not valid coord"
+      throw `SMove to not valid coord: ${c.toString()}`
 
     bot.pos = c
     state.spendEnergy(this.lld.getMlen() * 2)
@@ -103,12 +103,12 @@ export class LMove {
 
   constructor(sld1: Coord, sld2: Coord) {
     if (!sld1.isShortLinearDiff())
-      throw "1 is not a sld"
+      throw `1 is not a sld: ${sld1.toString()}`
     if (!sld2.isShortLinearDiff())
-      throw "2 is not a sld"
+      throw `2 is not a sld: ${sld2.toString()}`
 
-    this.sld1 = sld1;
-    this.sld2 = sld2;
+    this.sld1 = sld1.getCopy();
+    this.sld2 = sld2.getCopy();
   }
 
   run(state: State, bid: number) {
@@ -116,11 +116,11 @@ export class LMove {
 
     let c1 = bot.pos.getAdded(this.sld1)
     if (!state.matrix.isValidCoord(c1))
-      throw "C1 is not valid coord"
+      throw `C1 is not valid coord: ${c1.toString()}`
 
     let c2 = c1.getAdded(this.sld2)
     if (!state.matrix.isValidCoord(c2))
-      throw "C2 is not valid coord"
+      throw `C2 is not valid coord: ${c2.toString()}`
 
     bot.pos = c2
     state.spendEnergy((this.sld1.getMlen() + 2 + this.sld2.getMlen()) * 2)
@@ -135,7 +135,10 @@ export class FusionP {
   nd: Coord;
 
   constructor(nd: Coord) {
-    this.nd = nd;
+    if (!nd.isNearCoordDiff())
+      throw `Not a nd: ${nd.toString()}`
+    this.nd = nd.getCopy();
+
   }
 
   run(state: State, bid: number) {
@@ -143,7 +146,7 @@ export class FusionP {
   }
 
   toString(): string {
-    return "FusionP"
+    return `FusionP ${this.nd.toString()}`
   }
 
 }
@@ -152,7 +155,10 @@ export class FusionS {
   nd: Coord;
 
   constructor(nd: Coord) {
-    this.nd = nd;
+    if (!nd.isNearCoordDiff())
+      throw `Not a nd: ${nd.toString()}`
+    this.nd = nd.getCopy();
+
   }
 
   run(state: State, bid: number) {
@@ -160,7 +166,7 @@ export class FusionS {
   }
 
   toString(): string {
-    return "FusionS"
+    return `FusionS ${this.nd.toString()}`
   }
 
 }
@@ -170,7 +176,9 @@ export class Fission {
   m: number;
 
   constructor(nd: Coord, m: number) {
-    this.nd = nd;
+    if (!nd.isNearCoordDiff())
+      throw `Not a nd: ${nd.toString()}`
+    this.nd = nd.getCopy();
     this.m = m;
   }
 
@@ -178,7 +186,7 @@ export class Fission {
   }
 
   toString(): string {
-    return "Fission"
+    return `Fission ${this.nd.toString()} ${this.m}`
   }
 }
 
@@ -187,7 +195,7 @@ export class Fill {
 
   constructor(nd: Coord) {
     if (!nd.isNearCoordDiff())
-      throw "Not a nd"
+      throw `Not a nd: ${nd.toString()}`
     this.nd = nd.getCopy();
   }
 
@@ -195,7 +203,7 @@ export class Fill {
     let bot = state.getBot(bid)
     let c = bot.pos.getAdded(this.nd)
     if (!state.matrix.isValidCoord(c))
-      throw "Not valid coord"
+      throw `Fill for not valid coord: ${c.toString()}`
     if (state.bots.length > 1) {
       if (!bot.pos.isAdjacent(c) && state.verifyRegion(new Region(bot.pos, c))) {
         state.addRegion(new Region(bot.pos, c));
@@ -225,15 +233,15 @@ export class Void {
 
   constructor(nd: Coord) {
     if (!nd.isNearCoordDiff())
-      throw "Not a nd"
-    this.nd = nd;
+      throw `Not a nd: ${nd.toString()}`
+    this.nd = nd.getCopy();
   }
 
   run(state: State, bid: number) {
     let bot = state.getBot(bid)
     let c = bot.pos.getAdded(this.nd)
     if (!state.matrix.isValidCoord(c))
-      throw "Not valid coord"
+      throw `Void for not valid coord: ${this.nd.toString()}`
 
     let isAlreadyFilled = state.matrix.isFilled(c.x, c.y, c.z)
     state.matrix.clear(c.x, c.y, c.z)
@@ -251,8 +259,10 @@ export class GFill {
   fd: Coord;
 
   constructor(nd: Coord, fd: Coord) {
-    this.nd = nd;
-    this.fd = fd;
+    if (!nd.isNearCoordDiff())
+      throw `Not a nd: ${nd.toString()}`
+    this.nd = nd.getCopy();
+    this.fd = fd.getCopy();
   }
 
   run(state: State, bid: number) {
@@ -270,8 +280,10 @@ export class GVoid {
   fd: Coord;
 
   constructor(nd: Coord, fd: Coord) {
-    this.nd = nd;
-    this.fd = fd;
+    if (!nd.isNearCoordDiff())
+      throw `Not a nd: ${nd.toString()}`
+    this.nd = nd.getCopy();
+    this.fd = fd.getCopy();
   }
 
   run(state: State, bid: number) {
