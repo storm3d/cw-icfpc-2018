@@ -35,6 +35,8 @@ class GoToPointBotStrategy {
   }
 
   execute(bot: Bot, solver: MultiSolver) {
+    console.log("go");
+
     if (bot.pos.isEqual(this.target)) {
       if (solver.front.isEmpty() && bot.pos.isEqual(new Coord(0, 0, 0))) {
         solver.trace.execCommand(new command.Halt(), bot.bid)
@@ -55,7 +57,7 @@ class GoToPointBotStrategy {
 
       } catch (e) {
 
-        //console.log("waiting " + bot.bid + " " + solver.front.arr.length)
+        console.log("waiting goto " + bot.bid + " " + solver.front.arr.length)
         solver.trace.execCommand(new command.Wait(), bot.bid)
         this.waitingTurns++
 
@@ -73,7 +75,6 @@ class FillNeighboursBotStrategy {
   }
 
   execute(bot: Bot, solver: MultiSolver) {
-
 
     let isDoneFilling = false
     try {
@@ -98,7 +99,7 @@ class FillNeighboursBotStrategy {
       }
     } catch (e) {
 
-      console.log("waiting " + bot.bid + " " + solver.front.arr.length)
+//      console.log("waiting f " + bot.bid + " " + solver.front.arr.length)
       solver.trace.execCommand(new command.Wait(), bot.bid)
       this.waitingTurns++
 
@@ -131,11 +132,29 @@ class Front {
     return slice
   }
 
+  _checkArr() {
+    if (!this.arr.length) {
+      console.log("add floor")
+      this.y++;
+      if(this.y === this.matrix.r - 1)
+        return false;
+
+      this.arr = this._getFullSlice(this.targetMatrix, this.y);
+
+      if (!this.arr.length)
+        return false;
+    }
+    return true
+  }
+
   isEmpty() {
     return this.arr.length === 0
   }
 
   getInitTargetPosForBot() {
+    if(!this._checkArr())
+      return false;
+
     while(1) {
       let c = this.arr[Math.floor(Math.random() * this.arr.length)]
       if(c)
@@ -144,18 +163,8 @@ class Front {
   }
 
   getNextTargetPos(c: Coord) {
-
-    if (!this.arr.length) {
-      console.log("add floor")
-      y++;
-      if(y === this.matrix.r - 1)
-        return undefined;
-
-      this.arr = this._getFullSlice(this.targetMatrix, y);
-
-      if (!this.arr.length)
-        return undefined;
-    }
+    if(!this._checkArr())
+      return false;
 
     let closestI = 0
     let closestDist = 255
@@ -175,6 +184,8 @@ class Front {
   }
 
   getNearPosForFill(botC: Coord) {
+    if(!this._checkArr())
+      return undefined;
 
     for (let i = 0; i < this.arr.length; i++) {
       if (!this.arr[i])
