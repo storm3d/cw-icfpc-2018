@@ -234,6 +234,8 @@ class State {
   volatile: Array<Region>;
   isFinished: boolean
   fusions: any
+  groupFills: any
+  groupVoids: any
 
 
   constructor(matrix: Matrix, bot: Bot) {
@@ -245,6 +247,8 @@ class State {
     this.volatile = [];
     this.isFinished = false
     this.fusions = {}
+    this.groupFills = []
+    this.groupVoids = []
   }
 
   getBotsNum() {
@@ -285,10 +289,16 @@ class State {
     }
 
     if (Object.keys(this.fusions).length > 0)
-       throw `unmatched fusions: ${this.fusionsToString()}`
+      throw `unmatched fusions: ${this.fusionsToString()}`
+
+    if (this.groupFills.length > 0)
+      throw `unmatched GFills: ${this.groupCommandsToString(this.groupFills)}`
+    if (this.groupVoids.length > 0)
+      throw `unmatched GVoids: ${this.groupCommandsToString(this.groupVoids)}`
+
   }
 
-  isFreeRegion(r: Region) {
+  isFreeRegion(r: Region): boolean {
     for (let i = this.volatile.length - 1; i >= 0; i--) {
       if (r.isIntersects(this.volatile[i])) {
         return false;
@@ -303,11 +313,11 @@ class State {
     this.volatile.push(r);
   }
 
-  fusionsToString(){
+  fusionsToString(): string {
     return '[' + Object.keys(this.fusions).map(i => `<${i},t:${this.fusions[i].t},n:${this.fusions[i].n}>`).join(',') + ']'
   }
 
-  checkFusionP(bidP: number, bidS: number) {
+  checkFusionP(bidP: number, bidS: number): boolean {
     if (this.fusions[bidP])
       throw `Fusion primary id already registerd: ${bidP} = ${this.fusions[bidP]}`
     this.fusions[bidP] = {t:'p', n: bidS}
@@ -350,6 +360,75 @@ class State {
     this.bots[bid].seeds = seeds2
     this.bots[bid2] = new Bot(bid2, c, seeds1)
   }
+
+  groupCommandsToString(commands: any): string {
+    return '[' + commands.map(i => `{r:${i.r.toString()},ids:[${i.ids}],coords:[${ i.coords.map(c=>c.toString()).join(',') }]`).join(',') + ']'
+  }
+
+  __checkGroupCommands(bid:number, c1: Coord, c2: Coord, commands: any, name: string): boolean {
+    const r = new Region(c1, c2)
+    let gcommand = commands.find(i => i.r.isEqual(r));
+    if (!gcommand) {
+      commands.push({r: r, ids:[bid], coords:[c1]})
+      return false
+    }
+
+    if ((bid in gcommand.ids) || gcommand.coords.find(c => c.isEqual(c1)))
+        throw `${name} failed for ${bid} and coord:{c1.toString()} in ${this.groupCommandsToString(commands)}` 
+
+    gcommand.ids.push(bid)
+    gcommand.coords.push(c1.getCopy())
+
+    return gcommand.ids.length === (1 << r.getDim())
+  }
+
+  checkGFill(bid:number, c1: Coord, c2: Coord): boolean {
+      return this.__checkGroupCommands(bid, c1, c2, this.groupFills, "GFill")
+  }
+
+  checkGVoid(bid:number, c1: Coord, c2: Coord): boolean {
+      return this.__checkGroupCommands(bid, c1, c2, this.groupVoids, "GVoid")
+  }
+
+  __doGroupCommand(r: Region, commands: any, name: string, fill: boolean): any {
+    let gcommand = commands.find(i => i.r.isEqual(r));
+    if (!gcommand)
+        throw `${name} failed, region ${r.toString()} not found`
+
+    if (gcommand.ids.length !== (1 << r.getDim()))
+        throw `${name} failed, not enough bots for region ${r.toString()} : [${gcommand.ids}]`
+
+
+    let filled = 0
+    let empty = 0
+    for(let x = r.c1.x; x <= r.c2.x; x++) {
+      for(let y = r.c1.y; y <= r.c2.y; y++) {
+        for(let z = r.c1.z; z <= r.c2.z; z++) {
+            if (this.matrix.isFilled(x, y, z))
+            {
+              filled++;
+              if (!fill) this.matrix.clear(x, y, z)
+            } else {
+              empty++;
+              if (fill) this.matrix.fill(x, y, z)
+            }
+        }
+      }
+    }
+
+    // remove group command from list and return stats
+    commands.splice(commands.indexOf(gcommand), 1)
+    return {empty: empty, filled: filled}
+  }
+
+  doGFill(r: Region): any {
+    return this.__doGroupCommand(r, this.groupFills, "GFill", true)
+  }
+
+  doGVoid(r: Region): any {
+    return this.__doGroupCommand(r, this.groupVoids, "GVoid", false)
+  }
+
 }
 
 export { Coord, Region, Matrix, Bot, State };

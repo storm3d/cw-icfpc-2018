@@ -328,7 +328,24 @@ export class GFill {
   }
 
   run(state: State, bid: number) {
-    throw "unsupported"
+    const bot = state.getBot(bid)
+    const c1 = bot.pos.getAdded(this.nd)
+    if (!state.matrix.isValidCoord(c1))
+      throw `GFill for not valid nd coord: ${this.nd.toString()}`
+
+    const c2 = c1.getAdded(this.fd)
+    if (!state.matrix.isValidCoord(c2))
+      throw `GFill for not valid fd coord: ${this.fd.toString()}`
+
+
+    if (state.checkGFill(bid, c1, c2)) {
+      const r = new Region(c1, c2)
+      state.addVolatileRegion(r);
+      
+      const res = state.doGFill(r)
+      state.spendEnergy(res.empty * 12)
+      state.spendEnergy(res.filled * 6)
+    }
   }
 
   toString(): string {
@@ -348,7 +365,24 @@ export class GVoid {
   }
 
   run(state: State, bid: number) {
-    throw "unsupported"
+    const bot = state.getBot(bid)
+    const c1 = bot.pos.getAdded(this.nd)
+    if (!state.matrix.isValidCoord(c1))
+      throw `GVoid for not valid nd coord: ${this.nd.toString()}`
+
+    const c2 = c1.getAdded(this.fd)
+    if (!state.matrix.isValidCoord(c2))
+      throw `GVoid for not valid fd coord: ${this.fd.toString()}`
+
+
+    if (state.checkGVoid(bid, c1, c2)) {
+      const r = new Region(c1, c2)
+      state.addVolatileRegion(r);
+      
+      const res = state.doGVoid(r)
+      state.spendEnergy(res.empty * 3)
+      state.spendEnergy(res.filled * (-12))
+    }
   }
 
   toString(): string {

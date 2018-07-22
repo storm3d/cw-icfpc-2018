@@ -1,4 +1,4 @@
-import { Coord, Matrix, Bot, State } from "../../src/model/model";
+import { Coord, Matrix, Bot, State, coord } from "../../src/model/model";
 import * as trace from "../../src/model/command";
 
 describe('command ', () => {
@@ -117,7 +117,7 @@ describe('command ', () => {
     expect(state.matrix.isFilled(nd.x, nd.y, nd.z)).toBe(false);
   })
 
-  it("Fission should work", () => {
+  it("Fission and Fusions should work", () => {
     const nd = new Coord(1, 0, 0)
     const fission = new trace.Fission(nd, 20)
     fission.run(state, 1)
@@ -163,6 +163,56 @@ describe('command ', () => {
     fusionS2.run(state, 2)
     state.doEnergyTick()
     expect(state.getBot(3).seeds).toEqual([1,2].concat([...Array(37).keys()].map(x => x += 4)))
+})
+
+  it("GFill & GVoid should work", () => {
+    const nd = new Coord(1, 0, 0)
+    const fission = new trace.Fission(nd, 20)
+    fission.run(state, 1)
+    state.doEnergyTick()
+
+    const smove = new trace.SMove(coord(5,0,0))
+    smove.run(state, 2)
+    expect(state.getBot(2).pos).toEqual(coord(6, 0, 0))
+    state.doEnergyTick()
+
+    const gfill1 = new trace.GFill(coord(0, 1, 0), coord(6, 0, 0))
+    const gfill2 = new trace.GFill(coord(0, 1, 0), coord(-6, 0, 0))
+    gfill1.run(state, 1)
+    gfill2.run(state, 2)
+    state.doEnergyTick()
+    expect(state.matrix.isFilled(0, 1, 0)).toBe(true);
+    expect(state.matrix.isFilled(1, 1, 0)).toBe(true);
+    expect(state.matrix.isFilled(2, 1, 0)).toBe(true);
+    expect(state.matrix.isFilled(3, 1, 0)).toBe(true);
+    expect(state.matrix.isFilled(4, 1, 0)).toBe(true);
+    expect(state.matrix.isFilled(5, 1, 0)).toBe(true);
+    expect(state.matrix.isFilled(6, 1, 0)).toBe(true);
+
+    const gvoid1 = new trace.GVoid(coord(0, 1, 0), coord(6, 0, 0))
+    const gvoid2 = new trace.GVoid(coord(0, 1, 0), coord(-6, 0, 0))
+    gvoid1.run(state, 1)
+    gvoid2.run(state, 2)
+    state.doEnergyTick()
+    expect(state.matrix.isFilled(0, 1, 0)).toBe(false);
+    expect(state.matrix.isFilled(1, 1, 0)).toBe(false);
+    expect(state.matrix.isFilled(2, 1, 0)).toBe(false);
+    expect(state.matrix.isFilled(3, 1, 0)).toBe(false);
+    expect(state.matrix.isFilled(4, 1, 0)).toBe(false);
+    expect(state.matrix.isFilled(5, 1, 0)).toBe(false);
+    expect(state.matrix.isFilled(6, 1, 0)).toBe(false);
+
+    expect(()=> {
+      gfill1.run(state, 1)
+      state.doEnergyTick()
+    }).toThrowError("unmatched GFills: [{r:[<0,1,0>,<6,1,0>],ids:[1],coords:[<0,1,0>]]")
+    state.groupFills = []
+
+    expect(()=> {
+      gvoid1.run(state, 2)
+      state.doEnergyTick()
+    }).toThrowError("unmatched GVoids: [{r:[<6,1,0>,<12,1,0>],ids:[2],coords:[<6,1,0>]]")
+    state.groupVoids = []
 })
 
 })
