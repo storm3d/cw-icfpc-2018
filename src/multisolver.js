@@ -60,7 +60,7 @@ class GoToPointBotStrategy {
         this.waitingTurns++
 
         if (this.waitingTurns > 3)
-          bot.strategy = new FillNeighboursBotStrategy();
+          bot.strategy = new GoToPointBotStrategy(solver.front.getInitTargetPosForBot());
       }
 
     }
@@ -69,42 +69,42 @@ class GoToPointBotStrategy {
 
 class FillNeighboursBotStrategy {
   constructor() {
-    this.exitsNum = -1
+    this.waitingTurns = 0
   }
 
   execute(bot: Bot, solver: MultiSolver) {
 
-    if (this.exitsNum === -1) {
-      this.exitsNum = solver.state.matrix.getFreeWalkableNeighboursNum()
-    }
 
     let isDoneFilling = false
-
-
-    let cell = solver.front.getNearPosForFill(bot.pos)
-    if (cell) {
-      let fillDirection = new Coord(Math.sign(cell.x - bot.pos.x), Math.sign(cell.y - bot.pos.y), Math.sign(cell.z - bot.pos.z))
-
-      if (!(fillDirection.getMlen() === 1 && this.exitsNum < 2)) {
+    try {
+      let cell = solver.front.getNearPosForFill(bot.pos)
+      if (cell) {
+        let fillDirection = new Coord(Math.sign(cell.x - bot.pos.x), Math.sign(cell.y - bot.pos.y), Math.sign(cell.z - bot.pos.z))
 
         solver.trace.execCommand(new command.Fill(fillDirection), bot.bid)
         solver.front.deletePos(cell)
-
-        if (fillDirection.getMlen() === 1)
-          this.exitsNum--
-
         isDoneFilling = true
-      }
-    }
 
-    if (!isDoneFilling) {
-      let target = solver.front.getNextTargetPos(bot.pos)
-
-      if (!target) {
-        target = new Coord(0, 0, 0)
       }
-      bot.strategy = new GoToPointBotStrategy(target)
-      bot.strategy.execute(bot, solver)
+
+      if (!isDoneFilling) {
+        let target = solver.front.getNextTargetPos(bot.pos)
+
+        if (!target) {
+          target = new Coord(0, 0, 0)
+        }
+        bot.strategy = new GoToPointBotStrategy(target)
+        bot.strategy.execute(bot, solver)
+      }
+    } catch (e) {
+
+      console.log("waiting " + bot.bid + " " + solver.front.arr.length)
+      solver.trace.execCommand(new command.Wait(), bot.bid)
+      this.waitingTurns++
+
+      if (this.waitingTurns > 3) {
+        bot.strategy = new GoToPointBotStrategy(solver.front.getInitTargetPosForBot());
+      }
     }
   }
 }
@@ -112,9 +112,10 @@ class FillNeighboursBotStrategy {
 
 class Front {
   constructor(matrix: Matrix, targetMatrix: Matrix) {
-    this.arr = this._getFullSlice(targetMatrix, 0)
-    this.matrix = matrix
-    this.targetMatrix = targetMatrix
+    this.arr = this._getFullSlice(targetMatrix, 0);
+    this.matrix = matrix;
+    this.targetMatrix = targetMatrix;
+    this.y = 0;
 
     this.closestCachedI = 0
   }
@@ -135,16 +136,30 @@ class Front {
   }
 
   getInitTargetPosForBot() {
-    return this.arr[Math.floor(Math.random() * this.arr.length)].getAdded(new Coord(0, 1, 1))
+    while(1) {
+      let c = this.arr[Math.floor(Math.random() * this.arr.length)]
+      if(c)
+        return c.getAdded(new Coord(0, 1, 0));
+    }
   }
 
   getNextTargetPos(c: Coord) {
 
-    if (!this.arr.length)
-      return undefined;
+    if (!this.arr.length) {
+      console.log("add floor")
+      y++;
+      if(y === this.matrix.r - 1)
+        return undefined;
+
+      this.arr = this._getFullSlice(this.targetMatrix, y);
+
+      if (!this.arr.length)
+        return undefined;
+    }
 
     let closestI = 0
     let closestDist = 255
+
     for (let i = 0; i < this.arr.length; i++) {
       if (!this.arr[i])
         continue;
@@ -165,7 +180,7 @@ class Front {
       if (!this.arr[i])
         continue
       let diff = new Coord(this.arr[i].x - botC.x, this.arr[i].y - botC.y, this.arr[i].z - botC.z)
-      if (diff.getMlen() <= 2 && diff.getClen() === 1 && diff.y < 0) {
+      if (diff.getMlen() <= 2 && diff.getClen() === 1 /*&& diff.y < 0*/) {
         this.closestCachedI = i
         return this.arr[i];
       }
@@ -190,13 +205,14 @@ class Front {
     while (this.arr[0] === 0)
       this.arr.shift()
 
-    this.addNeighbours(c)
+    //this.addNeighbours(c)
   }
 
   addPos(c: Coord) {
     this.arr.push(c)
   }
 
+  /*
   addNeighbours(c: Coord) {
     //console.log(this.arr.length)
 
@@ -222,6 +238,7 @@ class Front {
       }
     }
   }
+  */
 }
 
 export default class MultiSolver {
@@ -246,13 +263,24 @@ export default class MultiSolver {
 
     //this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
     this.trace = new command.Trace(this.state)
-    bot.strategy = new FissionBotStrategy()
+    bot.strategy = new GoToPointBotStrategy(this.front.getInitTargetPosForBot()); //new FissionBotStrategy()
 
+    let step = 1
     while (!this.state.isFinished) {
+      if(step > 1550) {
+        this.trace.execCommand(new command.Halt(), 1)
+        break
+      }
+
       for (let bid in this.state.bots) {
         let bot = this.state.bots[bid]
         bot.strategy.execute(bot, this)
       }
+
+      console.log(this.state.bots[1].pos.toString())
+      console.log(step++)
+
+
 
       this.state.doEnergyTick()
     }

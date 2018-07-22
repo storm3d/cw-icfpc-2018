@@ -3,8 +3,8 @@ const app = express();
 const port = 3001;
 const path  = require('path');
 
-const tracePath = 'solveF/FA003.nbt';
-const modelPath = 'problemsF/FA003_tgt.mdl';
+const tracePath = 'solveF/FA001.nbt';
+const modelPath = 'problemsF/FA001_tgt.mdl';
 
 app.get('/trace', (request, response) => {
   response.sendFile(path.join(process.cwd(), tracePath));
