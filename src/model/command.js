@@ -1,5 +1,5 @@
 // @flow
-import { Coord, State, Bot, Region } from "./model";
+import { Coord, State, Bot, Region, VolatileError } from "./model";
 
 export class Trace {
   state: State;
@@ -11,8 +11,17 @@ export class Trace {
   }
 
   execCommand(c: any, bid: number | void) {
-    c.run(this.state, bid)
-    this.commands.push(c)
+    try {
+      c.run(this.state, bid)
+      this.commands.push(c)
+    }
+    catch (e) {
+      if (e instanceof VolatileError)
+        this.execCommand(new Wait(), bid);
+      else
+        throw e;
+    }
+
   }
 
 
@@ -224,16 +233,15 @@ export class Fission {
     let bot = state.getBot(bid)
     let c = bot.pos.getAdded(this.nd)
     if (!state.matrix.isValidCoord(c))
-      throw `Fission: not valid coord ${c.toString()}`
+      throw new Error(`Fission: not valid coord ${c.toString()}`)
 
     if(state.matrix.isFilled(c.x, c.y, c.z))
-      throw `Fission: voxel is filled ${c.toString()}`
-
-    state.addVolatileRegion(new Region(c, c));
+      throw new Error(`Fission: voxel is filled ${c.toString()}`)
 
     if(this.m + 1 > bot.seeds.length)
-      throw `Fission: m exceeds available seeds`
+      throw new Error(`Fission: m (${this.m}) exceeds available seeds ${bot.seeds.toString()}`)
 
+    state.addVolatileRegion(new Region(c, c));
 
     state.doFission(bid, this.m, c);
     state.spendEnergy(24)

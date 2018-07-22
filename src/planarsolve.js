@@ -10,7 +10,7 @@ export default class PlanarSolver {
 
   trace: command.Trace;
   state: State;
-  floatingVoxels : FloatingVoxels;
+  floatingVoxels: FloatingVoxels;
   botTasks: any;
 
   constructor(targetMatrix: Matrix | void) {
@@ -42,7 +42,7 @@ export default class PlanarSolver {
     return slice
   }
 
-  getPath(c1: Coord, c2: Coord, bid: number, verticalLast: boolean = false) : void {
+  getPath(c1: Coord, c2: Coord, bid: number, verticalLast: boolean = false): void {
     let cc = c1.getCopy();
 
     if (!verticalLast) {
@@ -183,21 +183,23 @@ export default class PlanarSolver {
      */
 
     let i = 0;
-    this.submitTask(new FissionTask());
-    this.executeStep()
+    while(i++ < 30) {
+      this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
+      this.executeStep()
+    }
 
-    this.submitTask(new FissionTask());
-    this.submitTask(new FissionTask());
-    this.executeStep()
-
-    this.submitTask(new FissionTask());
-    this.submitTask(new FissionTask());
-    this.submitTask(new FissionTask());
-    this.submitTask(new FissionTask());
-    this.executeStep()
+    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
+    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
+    // this.executeStep()
+    //
+    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
+    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
+    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
+    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
+    // this.executeStep()
 
     i = 0;
-    while(i++ < 200) {
+    while (i++ < 200) {
 
       // if (this.state.getBotsNum() < 10 && this.getFreeBot())
       //   this.submitTask(fission)
@@ -231,15 +233,17 @@ export default class PlanarSolver {
     this.state.doEnergyTick()
   }
 
-  getFreeBot() : Bot | void {
+  getFreeBot(botPredicate?: (bot: Bot) => boolean): Bot | void {
     for (let bid in this.state.bots) {
       if (!this.botTasks[bid] || this.botTasks[bid].isFinished())
-        return this.state.getBot(bid);
+        if (!botPredicate || botPredicate(this.state.getBot(bid)))
+          return this.state.getBot(bid);
     }
   }
 
-  submitTask(task: any) {
-    const bot = this.getFreeBot();
+  submitTask(task: any, botPredicate?: (bot: Bot) => boolean) {
+
+    const bot = this.getFreeBot(botPredicate);
 
     if (bot)
       this.botTasks[bot.bid] = task;

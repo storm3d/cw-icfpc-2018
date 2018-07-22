@@ -226,6 +226,13 @@ class Bot {
   }
 }
 
+export class VolatileError extends Error {
+  constructor(...args: any) {
+    super(...args)
+    Error.captureStackTrace(this, VolatileError)
+  }
+}
+
 class State {
   energy: number;
   harmonics: number;
@@ -257,7 +264,7 @@ class State {
 
   getBot(bid : number): Bot {
     if(!this.bots[bid])
-      throw "Bot not found"
+      throw new Error(`Bot '${bid}' not found`)
     return this.bots[bid]
   }
 
@@ -309,7 +316,7 @@ class State {
 
   addVolatileRegion(r: Region, noCheck: boolean = false) {
     if(!noCheck && !this.isFreeRegion(r))
-      throw new Error("Volatile intersection")
+      throw new VolatileError("Volatile intersection")
     this.volatile.push(r);
   }
 

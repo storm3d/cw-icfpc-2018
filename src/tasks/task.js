@@ -1,7 +1,7 @@
 // @flow
 
 import { Fission, Trace, Wait } from "../model/command";
-import { Bot, coord, Coord, Matrix } from "../model/model";
+import { Bot, coord, Coord, Matrix, VolatileError } from "../model/model";
 import { move } from "../model/move";
 
 export class Task {
@@ -32,15 +32,13 @@ export class MoveTask {
     const c = move(bot.pos, this.to, this.matrix);
 
     if (c) {
-      try {
         trace.execCommand(c, bot.bid);
         this.finished = bot.pos.getDiff(this.to).getMlen() == 0;
-      } catch(e) {
-        trace.execCommand(new Wait(), bot.bid);
-      }
     }
-    else
+    else {
       trace.execCommand(new Wait(), bot.bid);
+      this.finished = true;
+    }
   }
 
   isFinished() {
@@ -57,17 +55,12 @@ export class FissionTask {
   }
 
   execute(trace: Trace, bot: Bot) {
-    try {
-      if (bot.seeds.length)
-        trace.execCommand(new Fission(coord(1, 0, 0), bot.seeds.length / 2 + 1), bot.bid);
+      if (bot.seeds.length) {
+        trace.execCommand(new Fission(coord(0, 0, 1), Math.floor(bot.seeds.length / 2)), bot.bid);
+        this.finished = true;
+      }
       else
         trace.execCommand(new Wait(), bot.bid);
-
-      this.finished = true;
-
-    } catch (e) {
-      trace.execCommand(new Wait(), bot.bid);
-    }
   }
 
   isFinished() {
