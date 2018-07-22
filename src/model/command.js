@@ -169,9 +169,6 @@ export class FusionP {
       throw `FusionP: not found secondary bot in ${c.toString()}`
 
     if (state.checkFusionP(bid, botS.bid)) {
-      state.addVolatileRegion(new Region(bot.pos, bot.pos));
-      state.addVolatileRegion(new Region(c, c));
-
       state.doFusion(bid, botS.bid)
       state.spendEnergy(24)
     }
@@ -201,9 +198,6 @@ export class FusionS {
       throw `FusionS: not found primary bot in ${c.toString()}`
 
     if (state.checkFusionS(botP.bid, bid)) {
-      state.addVolatileRegion(new Region(bot.pos, bot.pos));
-      state.addVolatileRegion(new Region(c, c));
-
       state.doFusion(botP.bid, bid)
       state.spendEnergy(24)
     }
