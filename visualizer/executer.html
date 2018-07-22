@@ -1,80 +1,99 @@
 <!DOCTYPE html>
 <html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href="./assets/css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="./assets/style.css" media="screen" type="text/css">
-    <!-- <link rel="stylesheet" href="/assets/css/print.css" media="print" type="text/css"> -->
+    <link href="/assets/css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/assets/style.css" media="screen" type="text/css">
 
-<meta property="og:title" content="Execute Trace">
-<meta property="og:locale" content="en_US">
 
   </head>
 
   <body>
+    <header>
+      <div class="inner">
+        <a href="https://icfpcontest2018.github.io/index.html">
+          <h1>ICFP Programming Contest 2018</h1>
+        </a>
+        <!-- <h2>ICFP Programming Contest 2018 (website)</h2> -->
+
+
+      </div>
+    </header>
+
+
     <div id="content-wrapper">
       <div class="wide-inner clearfix">
         <section id="main-content" style="width: 100%;">
-          <h1 id="execute-trace-lightning">Execute Trace (Lightning)</h1>
+          <h1 id="execute-trace-full">Execute Trace (Full)</h1>
 
 <form lpformnum="1">
 
+<input type="hidden" id="full" value="true">
+
 <p>
-<label for="tgtModelFileIn">Target Model:</label><br>
-<input type="file" accept=".mdl" id="tgtModelFileIn">
+<label for="srcModelFileIn">Source Model:</label>
+<input type="checkbox" id="srcModelEmpty" checked=true>
+<label for="srcModelEmpty">empty</label><br>
+<input type="file" accept=".mdl" id="srcModelFileIn">
 </p>
 
 <p>
-<label for="traceFileIn">Trace:</label><br>
+<label for="tgtModelFileIn">Target Model:</label>
+<input type="checkbox" id="tgtModelEmpty">
+<label for="tgtModelEmpty">empty</label><br>
+<input accept=".mdl" type="file" id="tgtModelFileIn">
+</p>
+
+<p>
+<label for="traceFileIn">Trace:</label>
 <input accept=".nbt" type="file" id="traceFileIn">
 </p>
 
 
 <p>
 <label for="stepsPerFrame">Steps per Frame:</label><br>
-  <select id="stepsPerFrame">
-    <option value="-60">1/60</option>
-    <option value="-30">1/30</option>
-    <option selected="" value="1">1</option>
-    <option value="10">10</option>
-    <option value="50">50</option>
-    <option value="100">100</option>
-    <option value="500">500</option>
-    <option value="1000">1000</option>
-  </select>
+<select id="stepsPerFrame">
+<option value="-60">1/60</option>
+<option value="-30">1/30</option>
+<option selected="" value="1">1</option>
+<option value="10">10</option>
+<option value="50">50</option>
+<option value="100">100</option>
+<option value="500">500</option>
+<option value="1000">1000</option>
+</select>
 </p>
 
 
 <p>
-<input type="button" id="execTrace" value="Execute Trace" disabled="">
+<input type="button" id="execTrace" value="Execute Trace">
 </p>
-<!--p>
-<input type="button" id="showModel" value="show model">
-</p-->
 
 </form>
 
 <hr>
 
 <div id="glcanvas_container" style="position: relative;">
-  <canvas id="glcanvas" tabindex="0" width="1793" height="897" style="width: 1793px; height: 897px;">
+  <canvas id="glcanvas" tabindex="0" width="740" height="370" style="width: 740px; height: 370px;">
 </canvas><div style="position: absolute; top: 0px; left: 0px; cursor: pointer; opacity: 0.9; z-index: 10000;"><canvas width="80" height="48" style="width: 80px; height: 48px; display: block;"></canvas><canvas width="80" height="48" style="width: 80px; height: 48px; display: none;"></canvas><canvas width="80" height="48" style="width: 80px; height: 48px; display: none;"></canvas></div><button style="position: absolute; top: 0px; right: 0px; cursor: pointer; z-index: 10000;">Screenshot</button></div>
 
 <hr>
 
-<pre id="stdout"></pre>
+<pre id="stdout">
+</pre>
 
 <script>
 var vis = null;
 </script>
 
-<script src="./assets/three.min.js"></script>
+<script src="/assets/three.min.js"></script>
 
-<script src="./assets/Detector.js"></script>
+<script src="/assets/Detector.js"></script>
 
-<script src="./assets/stats.min.js"></script>
+<script src="/assets/stats.min.js"></script>
 
-<script src="./assets/visualizer.js"></script>
+<script src="/assets/visualizer.js"></script>
 
 <script>
 (function () {
@@ -90,47 +109,82 @@ var vis = null;
 })();
 </script>
 
-<script src="./assets/load-file-utils.js"></script>
+<script src="/assets/load-file-utils.js"></script>
 
 <script>
+var srcModelBData = null;
 var tgtModelBData = null;
 var traceBData = null;
 (function () {
+  var srcModelEmpty = document.getElementById('srcModelEmpty');
+  var tgtModelEmpty = document.getElementById('tgtModelEmpty');
   var execTrace = document.getElementById('execTrace');
   function onStart() {
     document.getElementById('stdout').innerHTML = "";
-    if (vis) {
-      vis.setSize(8, 8, 8);
-    };
+    if (vis) { vis.setSize(8, 8, 8); };
     execTrace.disabled = true;
   }
   function onSuccess() {
-    if (tgtModelBData && traceBData) {
+    if ((srcModelBData || srcModelEmpty.checked) &&
+        (tgtModelBData || tgtModelEmpty.checked) &&
+        !(srcModelEmpty.checked && tgtModelEmpty.checked) &&
+        traceBData) {
       execTrace.disabled = false;
     }
   }
   mkLoadBDataFromFile
+  ('srcModel',
+   function () { srcModelBData = null; onStart(); },
+   function () { },
+   onSuccess,
+   function(data) { srcModelBData = data; });
+  document.getElementById('srcModelEmpty').addEventListener('change',
+    function (e) { onStart();
+                   if (e.target.checked) {
+                     srcModelBData = null;
+                     document.getElementById('srcModelFileIn').disabled = true;
+                     document.getElementById('srcModelFileIn').value = "";
+                   } else {
+                     document.getElementById('srcModelFileIn').disabled = false;
+                   }
+                   onSuccess();
+    }, false);
+  mkLoadBDataFromFile
   ('tgtModel',
    function () { tgtModelBData = null; onStart(); },
-   function () { console.log("rtertert");},
+   function () { },
    onSuccess,
-   function(data) { tgtModelBData = data;});
+   function(data) { tgtModelBData = data; });
+  document.getElementById('tgtModelEmpty').addEventListener('change',
+    function (e) { onStart();
+                   if (e.target.checked) {
+                     tgtModelBData = null;
+                     document.getElementById('tgtModelFileIn').disabled = true;
+                     document.getElementById('tgtModelFileIn').value = "";
+                   } else {
+                     document.getElementById('tgtModelFileIn').disabled = false;
+                   }
+                   onSuccess();
+    }, false);
   mkLoadBDataFromFile
   ('trace',
    function () { traceBData = null; onStart(); },
    function () { },
    onSuccess,
-   function(data) { traceBData = data;});
-
+   function(data) { traceBData = data; });
 })();
 </script>
+<script src="/assets/show-model.js"></script>
+<script src="/assets/exec-trace.js"></script>
 
-<script src="./assets/exec-trace.js"></script>
-<script src="./assets/show-model.js"></script>
 
-</section>
+        </section>
       </div>
     </div>
+
+
+
+
 
 
 </body></html>

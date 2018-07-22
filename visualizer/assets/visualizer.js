@@ -1,5 +1,4 @@
 function initVisualizer(config) {
-    console.log("initVisualizer config", config);
 
     const scale = 2;
     const dscale = 2 * scale;
@@ -85,7 +84,18 @@ function initVisualizer(config) {
     var objs = new THREE.Group();
     scene.add(objs);
 
-    var floorMaterial = new THREE.MeshPhongMaterial({color: 0x888888, side: THREE.DoubleSide});
+    var fcolor = false;
+    var loFloorColor = new THREE.Color(0x333333);
+    var hiFloorColor = new THREE.Color(0x999999);
+    var floorMaterial = new THREE.MeshPhongMaterial({color: loFloorColor, side: THREE.DoubleSide});
+    function floorColorFlip () {
+        fcolor = ! fcolor;
+        if (fcolor) {
+            floorMaterial.color = hiFloorColor;
+        } else {
+            floorMaterial.color = loFloorColor;
+        }
+    }
     var floorGeometry = new THREE.Geometry();
     var floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.castShadow = false;
@@ -482,7 +492,6 @@ function initVisualizer(config) {
     }
 
     function setSize(sizeX_, sizeY_, sizeZ_) {
-        console.log("setSize", sizeX_, sizeY_, sizeZ_);
         sizeX = sizeX_;
         sizeY = sizeY_;
         sizeZ = sizeZ_;
@@ -786,6 +795,7 @@ function initVisualizer(config) {
 
     return {setSize: setSize,
             setMatrixFn: setMatrixFn,
+            floorColorFlip: floorColorFlip,
             fillMatrix: fillMatrix, voidMatrix: voidMatrix,
             botAdd: botAdd, botRem: botRem, botMove: botMove,
             render: render}
