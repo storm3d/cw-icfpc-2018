@@ -38,7 +38,7 @@ const exec = (inputFolder: string, outputFolder: string, num: string) => {
 };
 
 if (process.send === undefined) {
-    exec('problemsF', "solveF", "001");
+    exec('problemsF', "solveF", "003");
 }
 
 process.on('message', (msg) => {

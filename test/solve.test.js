@@ -22,7 +22,7 @@ describe("solver", () => {
     let solution = new Solver().solve(m)
 
     // console.log(solution.toString());
-    console.log(`Required steps: ${solution.commands.length}, energy: ${solution.state.energy}`);
+    //console.log(`Required steps: ${solution.commands.length}, energy: ${solution.state.energy}`);
 
     // expect(solution.commands.length).toBe(1564)
 

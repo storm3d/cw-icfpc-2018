@@ -5,6 +5,20 @@ import * as command from "./model/command"
 import * as model from "./model/model"
 
 // Bot strategies
+class FissionBotStrategy {
+  constructor() {
+
+  }
+
+  execute(bot: Bot, solver: MultiSolver) {
+    if(!solver.state.matrix.isFilled(bot.pos.x + 1, bot.pos.y, bot.pos.z)) {
+      solver.trace.execCommand(new command.Fission((new Coord(1, 0, 0)), bot.bid))
+    }
+    else
+      throw "Can't fission"
+  }
+}
+
 class GoToPointBotStrategy {
   constructor(target: Coord) {
     this.target = target
@@ -49,7 +63,7 @@ class GoToPointBotStrategy {
        }
 
        if(!isMoved) {
-         console.log("Void!")
+         //console.log("Void!")
          if(bot.pos.y !== this.target.y) {
            let dir = new Coord(0, Math.sign(this.target.y - bot.pos.y), 0)
            solver.trace.execCommand(new command.Void(dir), bot.bid)

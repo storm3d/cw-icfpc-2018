@@ -7,7 +7,7 @@ describe('command ', () => {
 
   beforeEach(() => {
     let matrix = new Matrix(20)
-    let bot = new Bot(1, new Coord(0, 0, 0), [...Array(19).keys()].map(x => x+=2))
+    let bot = new Bot(1, new Coord(0, 0, 0), [...Array(39).keys()].map(x => x+=2))
     state = new State(matrix, bot)
   })
 
@@ -111,6 +111,17 @@ describe('command ', () => {
     voidC.run(state, 1)
 
     expect(state.matrix.isFilled(nd.x, nd.y, nd.z)).toBe(false);
+  })
+
+  it("Fission should work", () => {
+    const nd = new Coord(1, 0, 0)
+    const fission = new trace.Fission(nd, 20)
+    fission.run(state, 1)
+    expect(state.getBotsNum()).toBe(2)
+    expect(state.getBot(2).bid).toBe(2)
+
+    expect(state.getBot(1).seeds.length).toBe(18)
+    expect(state.getBot(2).seeds.length).toBe(20)
   })
 
 })

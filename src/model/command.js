@@ -1,5 +1,5 @@
 // @flow
-import { Coord, State, Region } from "./model";
+import { Coord, State, Bot, Region } from "./model";
 
 export class Trace {
   state: State;
@@ -170,7 +170,6 @@ export class FusionS {
   toString(): string {
     return `FusionS ${this.nd.toString()}`
   }
-
 }
 
 export class Fission {
@@ -185,6 +184,23 @@ export class Fission {
   }
 
   run(state: State, bid: number) {
+    let bot = state.getBot(bid)
+    let c = bot.pos.getAdded(this.nd)
+    if (!state.matrix.isValidCoord(c))
+      throw `Fission: not valid coord ${c.toString()}`
+
+    if(state.matrix.isFilled(c.x, c.y, c.z))
+      throw `Fission: voxel is filled ${c.toString()}`
+
+    if(this.m + 1 > bot.seeds.length)
+      throw `Fission: m exceeds available seeds`
+
+    let seeds = bot.seeds.splice(0, this.m + 1)
+    let childBid = seeds.splice(0, 1)[0]
+
+    state.bots[childBid] = new Bot(childBid, c, seeds)
+
+    state.spendEnergy(24)
   }
 
   toString(): string {
@@ -206,6 +222,7 @@ export class Fill {
     let c = bot.pos.getAdded(this.nd)
     if (!state.matrix.isValidCoord(c))
       throw `Fill: not valid coord ${c.toString()}`
+    /*
     if (state.bots.length > 1) {
       if (!bot.pos.isAdjacent(c) && state.verifyRegion(new Region(bot.pos, c))) {
         state.addRegion(new Region(bot.pos, c));
@@ -218,6 +235,7 @@ export class Fill {
         throw err;
       }
     }
+    */
 
     let isAlreadyFilled = state.matrix.isFilled(c.x, c.y, c.z)
     state.matrix.fill(c.x, c.y, c.z)

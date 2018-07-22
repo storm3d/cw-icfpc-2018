@@ -9,6 +9,6 @@ test("multisolve", () => {
   // console.log(solution.toString());
   // console.log(`Required steps: ${solution.commands.length}, energy: ${solution.state.energy}`);
 
-  expect(solution.commands.length).toBe(18)
+  expect(solution.commands.length).toBe(1508)
 
 });
