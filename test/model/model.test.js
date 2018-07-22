@@ -2,13 +2,13 @@ import { Coord, Matrix, Bot, State, Region } from "../../src/model/model";
 import assert from 'assert';
 
 test("Coord", () => {
-  const c = new Coord(1, 2, 3);
+  let c = new Coord(1, 2, 3);
   expect(c.x).toBe(1);
   expect(c.y).toBe(2);
   expect(c.z).toBe(3);
 
   const v = new Coord(1, -1, 0);
-  c.addVector(v)
+  c = c.getAdded(v)
   expect(c.x).toBe(2);
   expect(c.y).toBe(1);
   expect(c.z).toBe(3);

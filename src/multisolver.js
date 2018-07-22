@@ -1,13 +1,95 @@
 // @flow
 
-import { Bot, Coord, Matrix } from "./model/model";
+import { Bot, Coord, Matrix, State } from "./model/model";
 import * as command from "./model/command"
 import * as model from "./model/model"
-import FloatingVoxels from "./model/floating-voxels";
 
-export default class MultiSolver {
+// Bot strategies
+class GoToPointBotStrategy {
+  constructor(target: Coord) {
+    this.target = target
+  }
 
-  getSlice(m: Matrix, y: number): Array {
+  execute(bot: Bot, solver: MultiSolver) {
+     if(bot.pos.isEqual(this.target)) {
+       if(solver.front.isEmpty() && bot.pos.isEqual(new Coord(0, 0, 0))) {
+         solver.trace.execCommand(new command.Halt(), bot.bid)
+       }
+       else {
+         bot.strategy = new FillNeighboursBotStrategy()
+         bot.strategy.execute(bot, solver)
+       }
+     }
+     else {
+
+       let isMoved = false
+
+       if(bot.pos.y !== this.target.y) {
+         let dir = Math.sign(this.target.y - bot.pos.y)
+         if(!solver.state.matrix.isFilled(bot.pos.x, bot.pos.y + dir, bot.pos.z)) {
+           solver.trace.execCommand(new command.SMove(new Coord(0, dir, 0)), bot.bid)
+           isMoved = true
+         }
+       }
+
+       if(!isMoved && bot.pos.x !== this.target.x) {
+         let dir = Math.sign(this.target.x - bot.pos.x)
+         if(!solver.state.matrix.isFilled(bot.pos.x + dir, bot.pos.y, bot.pos.z)) {
+           solver.trace.execCommand(new command.SMove(new Coord(dir, 0, 0)), bot.bid)
+           isMoved = true
+         }
+       }
+
+       if(!isMoved && bot.pos.z !== this.target.z) {
+         let dir = Math.sign(this.target.z - bot.pos.z)
+         if(!solver.state.matrix.isFilled(bot.pos.x, bot.pos.y, bot.pos.z + dir)) {
+           solver.trace.execCommand(new command.SMove(new Coord(0, 0, dir)), bot.bid)
+           isMoved = true
+         }
+       }
+
+       if(!isMoved) {
+         solver.trace.execCommand(new command.Halt(), bot.bid)
+       }
+     }
+  }
+}
+
+class FillNeighboursBotStrategy {
+  constructor() {
+  }
+
+  execute(bot: Bot, solver: MultiSolver) {
+
+    let cell = solver.front.getNearPosForFill(bot.pos)
+    if(cell) {
+      solver.trace.execCommand(new command.Fill(new Coord(Math.sign(cell.x - bot.pos.x), Math.sign(cell.y - bot.pos.y), Math.sign(cell.z - bot.pos.z))), bot.bid)
+      solver.front.deletePos(cell)
+    }
+    else {
+      let target = solver.front.getNextPos()
+
+      if(!target) {
+        target = new Coord(0, 0, 0)
+      }
+      bot.strategy = new GoToPointBotStrategy(target)
+      bot.strategy.execute(bot, solver)
+    }
+  }
+}
+
+
+
+class Front {
+  constructor(matrix: Matrix, targetMatrix: Matrix) {
+    this.arr = this._getFullSlice(targetMatrix, 0)
+    this.matrix = matrix
+    this.targetMatrix = targetMatrix
+
+    this.closestCachedI = 0
+  }
+
+  _getFullSlice(m: Matrix, y: number): Array<Coord> {
 
     let slice = []
     for (let z = 0; z < m.r; z++)
@@ -18,137 +100,117 @@ export default class MultiSolver {
     return slice
   }
 
-  getPath(c1: Coord, c2: Coord, isBack = false): Array {
-    let cc = c1.getCopy();
-
-    if (!isBack) {
-      while (cc.y !== c2.y) {
-        let diff = Math.sign(c2.y - cc.y) * (Math.abs(c2.y - cc.y) > 15 ? 15 : Math.abs(c2.y - cc.y))
-        this.trace.execCommand(new command.SMove(new Coord(0, diff, 0)))
-        cc.y += diff
-      }
-    }
-
-    while (cc.x !== c2.x) {
-      let diff = Math.sign(c2.x - cc.x) * (Math.abs(c2.x - cc.x) > 15 ? 15 : Math.abs(c2.x - cc.x))
-      this.trace.execCommand(new command.SMove(new Coord(diff, 0, 0)))
-      cc.x += diff
-    }
-
-    while (cc.z !== c2.z) {
-      let diff = Math.sign(c2.z - cc.z) * (Math.abs(c2.z - cc.z) > 15 ? 15 : Math.abs(c2.z - cc.z))
-      this.trace.execCommand(new command.SMove(new Coord(0, 0, diff)))
-      cc.z += diff
-    }
-
-    if (isBack) {
-      while (cc.y !== c2.y) {
-        let diff = Math.sign(c2.y - cc.y) * (Math.abs(c2.y - cc.y) > 15 ? 15 : Math.abs(c2.y - cc.y))
-        this.trace.execCommand(new command.SMove(new Coord(0, diff, 0)))
-        cc.y += diff
-      }
-    }
+  isEmpty() {
+    return this.arr.length === 0
   }
 
-
-  fillVoxel(c: Coord) {
-
-    const fillPos = this.state.getBot(1).pos.getAdded(c);
-    this.floatingVoxels.fill(fillPos.x, fillPos.y, fillPos.z, this.state.matrix);
-
-    if (!this.floatingVoxels.allGrounded() && this.state.harmonics === 0)
-      this.trace.execCommand(new command.Flip());
-
-    this.trace.execCommand(new command.Fill(c));
-
-    if (this.floatingVoxels.allGrounded() && this.state.harmonics !== 0)
-      this.trace.execCommand(new command.Flip());
-
+  getInitPosForBot() {
+    return this.arr[0].getAdded(new Coord(0, 1, 1))
   }
 
-  fillSlice(start: Coord, slice: Array, matrix: Matrix) {
-    let cc = start.getCopy();
+  getNextPos() {
+    for (let i = 0; i < this.arr.length; i++) {
+      if (!this.arr[i])
+        continue
+      return this.arr[i].getAdded(new Coord(0, 1, 0))
+    }
+    return undefined
+  }
 
-    let isGrounded = false
+  getNearPosForFill(botC: Coord) {
 
-    while (1) {
-
-      let bestI = undefined
-      let minD = 1255
-      for (let i = 0; i < slice.length; i++) {
-        if (!slice[i])
-          continue
-        if (Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z) < minD) {
-
-          //console.log(matrix.isFilled(slice[i].x, slice[i].y - 1, slice[i].z))
-          if (isGrounded) {
-            bestI = i
-            minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
-          }
-          else if (slice[i].y === 0 || matrix.isFilled(slice[i].x, slice[i].y - 1, slice[i].z)) {
-            isGrounded = true
-            bestI = i
-            minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
-          }
-        }
+    for (let i = 0; i < this.arr.length; i++) {
+      if (!this.arr[i])
+        continue
+      let diff = new Coord(this.arr[i].x - botC.x, this.arr[i].y - botC.y, this.arr[i].z - botC.z)
+      if(diff.getMlen() <= 2 && diff.getClen() == 1 && diff.y < 0) {
+        this.closestCachedI = i
+        return this.arr[i];
       }
+    }
+    return undefined
+  }
 
-      //console.log(bestI)
-
-      if (bestI === undefined)
-        break
-
-      let c = slice[bestI]
-
-      let botC = c.getAdded(new Coord(0, 1, 0))
-      //console.log(botC)
-
-      this.getPath(cc, botC)
-      //console.log(path)
-      cc = botC
-
-      for (let i = 0; i < slice.length; i++) {
-        if (!slice[i])
+  deletePos(c: Coord) {
+    if(this.arr[this.closestCachedI] && c.isEqual(this.arr[this.closestCachedI]))
+      this.arr[this.closestCachedI] = 0
+    else {
+      for (let i = 0; i < this.arr.length; i++) {
+        if (!this.arr[i])
           continue
-        if (Math.abs(slice[i].x - botC.x) + Math.abs(slice[i].z - botC.z) <= 1) {
-          this.fillVoxel(new Coord(Math.sign(slice[i].x - botC.x), -1, Math.sign(slice[i].z - botC.z)))
-          slice[i] = undefined
+        if (c.isEqual(this.arr[i])) {
+          this.arr[i] = 0
+          break
         }
       }
     }
 
-  };
+    while(this.arr[0] === 0)
+      this.arr.shift()
+
+    this.addNeighbours(c)
+  }
+
+  addNeighbours(c: Coord) {
+    console.log(this.arr.length)
+
+    for(let x = Math.max(0, c.x - 1); x <= c.x + 1; x++) {
+      for (let y = Math.max(0, c.y - 1); y <= c.y + 1; y++) {
+        for (let z = Math.max(0, c.z - 1); z <= c.z + 1; z++) {
+          let diff = new Coord(x - c.x, y - c.y, z - c.z)
+          if (diff.getMlen() <= 1 && diff.getClen() == 1
+            && !this.matrix.isFilled(x, y, z) && this.targetMatrix.isFilled(x, y, z)) {
+            let isAddedAlready = false
+            for (let i = 0; i < this.arr.length; i++) {
+              if (!this.arr[i])
+                continue
+              if (this.arr[i].x === x && this.arr[i].y === y && this.arr[i].z === z) {
+                isAddedAlready = true
+                break
+              }
+            }
+
+            if (!isAddedAlready)
+              this.arr.push(new Coord(x, y, z))
+          }
+        }
+      }
+    }
+  }
+}
+
+export default class MultiSolver {
+
+//  botStrategies: any
+  front: Front
+  trace: command.Trace
+  state: State
+
+  //floatingVoxels : FloatingVoxels;
+
+  constructor() {
+    //this.strategy = new GoToModelStrategy()
+  }
 
   solve(targetMatrix: Matrix) {
 
     let matrix = new Matrix(targetMatrix.r)
     let bot = new Bot(1, new Coord(0, 0, 0), [...Array(39).keys()].map(x => x += 2))
-
     this.state = new model.State(matrix, bot);
-    this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
+    this.front = new Front(matrix, targetMatrix)
+
+    //this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
     this.trace = new command.Trace(this.state)
+    bot.strategy = new GoToPointBotStrategy(this.front.getInitPosForBot())
 
-    // this.trace.execCommand(new command.Flip())
+    while(!this.state.isFinished) {
+      for(let bid in this.state.bots) {
+        let bot = this.state.bots[bid]
+        bot.strategy.execute(bot, this)
+      }
 
-    for (let level = 0; level < matrix.r; level++) {
-      let slice = this.getSlice(targetMatrix, level)
-      //console.log(slice.length)
-      if (slice === [])
-        break
-
-      //console.log(state.getBot(1).pos)
-      this.fillSlice(this.state.getBot(1).pos, slice, targetMatrix)
-
+      this.state.doEnergyTick()
     }
-
-    let origin = new Coord(0, 0, 0)
-
-    //console.log(this.state.getBot(1).pos)
-    this.getPath(this.state.getBot(1).pos, origin, true)
-
-    if (this.state.harmonics !== 0 )
-      this.trace.execCommand(new command.Flip())
-    this.trace.execCommand(new command.Halt())
 
     return this.trace
   }

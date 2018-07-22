@@ -1,7 +1,7 @@
 import fs from 'fs'
 import {readModel} from "./model/reader"
 import {serializeTrace} from "./model/writer";
-import Solver from "./solve";
+import MultiSolver from "./multisolver";
 
 const modelName = (num: string) => {
     return "FA" + num + "_tgt.mdl";
@@ -13,16 +13,13 @@ const traceName = (num: string) => {
 
 const exec = (inputFolder: string, outputFolder: string, num: string) => {
     let modelFileName = "./" + inputFolder + "/" + modelName(num);
-    console.log(modelFileName);
+    //console.log(modelFileName);
     const m = readModel(modelFileName);
 
-    let solution = new Solver().solve(m);
+    let solution = new MultiSolver().solve(m);
     let dump = serializeTrace(solution.commands);
 
     // console.log(dump)
-
-    // TODO: now write the solution
-
     let traceFileName = "./" + outputFolder + "/" + traceName(num);
     console.log(traceFileName);
     fs.writeFile(traceFileName, new Buffer(dump), err => {

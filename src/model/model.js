@@ -11,11 +11,13 @@ class Coord {
     this.z = z;
   }
 
+  /*
   addVector(v: Coord) {
     this.x += v.x
     this.y += v.y
     this.z += v.z
   }
+  */
 
   getAdded(v: Coord) {
     return new Coord(this.x + v.x, this.y + v.y, this.z + v.z)
@@ -153,6 +155,7 @@ class State {
   matrix: Matrix;
   bots: any;
   volatile: any;
+  isFinished: boolean
 
   constructor(matrix: Matrix, bot: Bot) {
     this.energy = 0;
@@ -161,6 +164,8 @@ class State {
     this.bots = {};
     this.bots[1] = bot;
     this.volatile = [];
+    this.isFinished = false
+    
   }
 
   getBotsNum() {
