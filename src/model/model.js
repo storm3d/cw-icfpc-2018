@@ -78,8 +78,8 @@ class Region {
   c2: Coord;
 
   constructor(c1: Coord, c2: Coord) {
-    this.c1 = c1
-    this.c2 = c2
+    this.c1 = coord(Math.min(c1.x, c2.x), Math.min(c1.y, c2.y), Math.min(c1.z, c2.z))
+    this.c2 = coord(Math.max(c1.x, c2.x), Math.max(c1.y, c2.y), Math.max(c1.z, c2.z))
   }
 
   isEqual(r: Region) {
