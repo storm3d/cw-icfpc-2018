@@ -36,7 +36,8 @@
     "prestart": "babel src -d dist",
     "start": "node dist/index.js",
     "prelaunch": "babel src -d dist",
-    "launch": "node dist/runner/launch.js"
+    "launch": "node dist/runner/launch.js",
+    "show": "node visualizer/server.js"
   },
   "jest": {
     "testEnvironment": "node"
@@ -44,7 +45,9 @@
   "keywords": [
     "cw-icfp-2018"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "express": "^4.16.3"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",

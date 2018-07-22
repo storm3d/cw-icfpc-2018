@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="./assets/css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="./assets/style.css" media="screen" type="text/css">
+    <!-- <link rel="stylesheet" href="/assets/css/print.css" media="print" type="text/css"> -->
+
+<meta property="og:title" content="Execute Trace">
+<meta property="og:locale" content="en_US">
+
+  </head>
+
+  <body>
+    <div id="content-wrapper">
+      <div class="wide-inner clearfix">
+        <section id="main-content" style="width: 100%;">
+          <h1 id="execute-trace-lightning">Execute Trace (Lightning)</h1>
+
+<form lpformnum="1">
+
+<p>
+<label for="tgtModelFileIn">Target Model:</label><br>
+<input type="file" accept=".mdl" id="tgtModelFileIn">
+</p>
+
+<p>
+<label for="traceFileIn">Trace:</label><br>
+<input accept=".nbt" type="file" id="traceFileIn">
+</p>
+
+
+<p>
+<label for="stepsPerFrame">Steps per Frame:</label><br>
+  <select id="stepsPerFrame">
+    <option value="-60">1/60</option>
+    <option value="-30">1/30</option>
+    <option selected="" value="1">1</option>
+    <option value="10">10</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+    <option value="500">500</option>
+    <option value="1000">1000</option>
+  </select>
+</p>
+
+
+<p>
+<input type="button" id="execTrace" value="Execute Trace" disabled="">
+</p>
+<!--p>
+<input type="button" id="showModel" value="show model">
+</p-->
+
+</form>
+
+<hr>
+
+<div id="glcanvas_container" style="position: relative;">
+  <canvas id="glcanvas" tabindex="0" width="1793" height="897" style="width: 1793px; height: 897px;">
+</canvas><div style="position: absolute; top: 0px; left: 0px; cursor: pointer; opacity: 0.9; z-index: 10000;"><canvas width="80" height="48" style="width: 80px; height: 48px; display: block;"></canvas><canvas width="80" height="48" style="width: 80px; height: 48px; display: none;"></canvas><canvas width="80" height="48" style="width: 80px; height: 48px; display: none;"></canvas></div><button style="position: absolute; top: 0px; right: 0px; cursor: pointer; z-index: 10000;">Screenshot</button></div>
+
+<hr>
+
+<pre id="stdout"></pre>
+
+<script>
+var vis = null;
+</script>
+
+<script src="./assets/three.min.js"></script>
+
+<script src="./assets/Detector.js"></script>
+
+<script src="./assets/stats.min.js"></script>
+
+<script src="./assets/visualizer.js"></script>
+
+<script>
+(function () {
+  if (! Detector.webgl) {
+    const glcanvasContainer = document.getElementById('glcanvas_container');
+    const glcanvas = document.getElementById('glcanvas');
+    glcanvasContainer.removeChild(glcanvas);
+    var warning = Detector.getWebGLErrorMessage();
+    glcanvasContainer.appendChild(warning);
+  } else {
+    vis = initVisualizer({stats: true, screenshot: true, controls: true});
+  }
+})();
+</script>
+
+<script src="./assets/load-file-utils.js"></script>
+
+<script>
+var tgtModelBData = null;
+var traceBData = null;
+(function () {
+  var execTrace = document.getElementById('execTrace');
+  function onStart() {
+    document.getElementById('stdout').innerHTML = "";
+    if (vis) {
+      vis.setSize(8, 8, 8);
+    };
+    execTrace.disabled = true;
+  }
+  function onSuccess() {
+    if (tgtModelBData && traceBData) {
+      execTrace.disabled = false;
+    }
+  }
+  mkLoadBDataFromFile
+  ('tgtModel',
+   function () { tgtModelBData = null; onStart(); },
+   function () { console.log("rtertert");},
+   onSuccess,
+   function(data) { tgtModelBData = data;});
+  mkLoadBDataFromFile
+  ('trace',
+   function () { traceBData = null; onStart(); },
+   function () { },
+   onSuccess,
+   function(data) { traceBData = data;});
+
+})();
+</script>
+
+<script src="./assets/exec-trace.js"></script>
+<script src="./assets/show-model.js"></script>
+
+</section>
+      </div>
+    </div>
+
+
+</body></html>
