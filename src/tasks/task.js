@@ -16,6 +16,24 @@ export class Task {
 
 }
 
+export class SingleCommandTask {
+  command: any;
+  finished: boolean;
+
+  constructor(command: any) {
+    this.command = command
+    this.finished = false;
+  }
+
+  execute(trace: Trace, bot: Bot) {
+    this.finished = trace.execCommand(this.command, bot.bid);
+  }
+
+  isFinished() {
+    return this.finished;
+  }
+}
+
 export class MoveTask {
   to: Coord;
   matrix: Matrix;

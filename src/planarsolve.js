@@ -4,10 +4,15 @@ import { Bot, coord, Coord, Matrix, State } from "./model/model";
 import * as command from "./model/command"
 import * as model from "./model/model"
 import FloatingVoxels from "./model/floating-voxels";
-import { FissionTask, MoveTask, Task } from "./tasks/task";
+import { FissionTask, MoveTask, SingleCommandTask, Task } from "./tasks/task";
+import { Trace } from "./model/command";
+import { move } from "./model/move";
+import { Wait } from "./model/command";
+import { Fission } from "./model/command";
 
 export default class PlanarSolver {
 
+  targetMatrix: Matrix
   trace: command.Trace;
   state: State;
   floatingVoxels: FloatingVoxels;
@@ -25,6 +30,7 @@ export default class PlanarSolver {
       let matrix = new Matrix(targetMatrix.r)
       let bot = new Bot(1, new Coord(0, 0, 0), [...Array(39).keys()].map(x => x += 2))
 
+      this.targetMatrix = targetMatrix;
       this.state = new model.State(matrix, bot);
       this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
       this.trace = new command.Trace(this.state);
@@ -109,11 +115,11 @@ export default class PlanarSolver {
         }
       }
     }
-    return bestIdx ? slice[bestIdx] : undefined;
+    return bestIdx !== undefined ? slice[bestIdx] : undefined;
   }
 
 
-  fillVoxel(c: Coord, matrix: Matrix, bot: Bot): boolean {
+  fillVoxel(c: Coord, matrix: Matrix, targetMatrix: Matrix, bot: Bot) {
 
     // const fillPos = this.state.getBot(bid).pos.getAdded(c);
     // this.floatingVoxels.fill(fillPos.x, fillPos.y, fillPos.z, this.state.matrix);
@@ -122,25 +128,22 @@ export default class PlanarSolver {
     //   this.trace.execCommand(new command.Flip(), bid);
 
     let cc = bot.pos.getAdded(c)
-    if (matrix.isValidCoord(cc) && !matrix.isFilled(cc.x, cc.y, cc.z)) {
-      this.trace.execCommand(new command.Fill(c), bot.bid);
-      return true;
+    if (matrix.isValidCoord(cc) && targetMatrix.isFilled(cc.x, cc.y, cc.z) && !matrix.isFilled(cc.x, cc.y, cc.z)) {
+      return new command.Fill(c)
     }
-
-    return false;
 
     // if (this.floatingVoxels.allGrounded() && this.state.harmonics !== 0)
     //   this.trace.execCommand(new command.Flip(), bid);
 
   }
 
-  fillUnder(matrix: Matrix, bot: Bot): boolean {
+  fillUnder(matrix: Matrix, targetMatrix: Matrix, bot: Bot) {
 
-    return (this.fillVoxel(coord(-1, -1, 0), matrix, bot) ||
-      this.fillVoxel(coord(0, -1, 0), matrix, bot) ||
-      this.fillVoxel(coord(1, -1, 0), matrix, bot) ||
-      this.fillVoxel(coord(0, -1, -1), matrix, bot) ||
-      this.fillVoxel(coord(0, -1, 1), matrix, bot))
+    return (this.fillVoxel(coord(-1, -1, 0), matrix, targetMatrix, bot) ||
+      this.fillVoxel(coord(0, -1, 0), matrix, targetMatrix, bot) ||
+      this.fillVoxel(coord(1, -1, 0), matrix, targetMatrix, bot) ||
+      this.fillVoxel(coord(0, -1, -1), matrix, targetMatrix, bot) ||
+      this.fillVoxel(coord(0, -1, 1), matrix, targetMatrix, bot))
   }
 
   fillSlice(slice: Array<Coord>, matrix: Matrix, bot: Bot) {
@@ -159,7 +162,9 @@ export default class PlanarSolver {
 
       cc = botC
 
-      while(this.fillUnder(matrix, bot));
+      let comm
+      while(comm = this.fillUnder(this.state.matrix, matrix, bot))
+        this.trace.execCommand(comm, bot.bid);
 
       // for (let i = 0; i < slice.length; i++) {
       //   if (!slice[i])
@@ -199,12 +204,21 @@ export default class PlanarSolver {
 
      */
 
-    let i = 0;
-    while(i++ <= 30) {
-      this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
-    }
+    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
 
+    //
+    // for (let level = 0; level < targetMatrix.r; level++) {
+    //   let slice = this.getSlice(targetMatrix, level)
+    //   //console.log(slice.length)
+    //   if (slice === [])
+    //     break
+    //
+    //
+    //   this.fillSlice(slice, targetMatrix, this.state.getBot(1))
+    // }
 
+    this.submitTask(new SingleCommandTask(new command.Flip()));
+    this.executeStep()
 
     for (let level = 0; level < targetMatrix.r; level++) {
       let slice = this.getSlice(targetMatrix, level)
@@ -212,30 +226,29 @@ export default class PlanarSolver {
       if (slice === [])
         break
 
-      this.fillSlice(slice, targetMatrix, this.state.getBot(1))
+      this.executeStep(() => (new FillNearestTask(this, level)))
     }
 
-    i = 0;
-    while (i++ < 200) {
-
-      this.executeStep()
-
-    }
+    this.submitTask(new SingleCommandTask(new command.Flip()));
+    this.executeStep()
 
     this.trace.execCommand(new command.Halt())
 
     return this.trace
   }
 
-  executeStep() {
+  executeStep(defaultTaskCallback?: () => any) {
 
     this.assignTasksFromQueue()
 
     for (let bid in this.state.bots) {
       let bot = this.state.getBot(bid);
       if (!this.botTasks[bid] || this.botTasks[bid].isFinished()) {
-        const r = this.state.matrix.r - 1;
-        new MoveTask(coord(r, r, r), this.state.matrix).execute(this.trace, bot);
+
+        const task = defaultTaskCallback ? defaultTaskCallback() : new SingleCommandTask(new command.Wait())
+
+        this.botTasks[bot.bid] = task
+        task.execute(this.trace, bot)
       }
       else {
         this.botTasks[bid].execute(this.trace, bot);
@@ -250,6 +263,14 @@ export default class PlanarSolver {
     this.taskQueue.push({ task, botPredicate })
   }
 
+  getFreeBot(botPredicate?: (bot: Bot) => boolean): Bot | void {
+    for (let bid in this.state.bots) {
+      if (!this.botTasks[bid] || this.botTasks[bid].isFinished())
+        if (!botPredicate || botPredicate(this.state.getBot(bid)))
+          return this.state.getBot(bid);
+    }
+  }
+
   assignTasksFromQueue() {
     for (let i = 0; i < this.taskQueue.length; i++) {
       const task = this.taskQueue[i]
@@ -262,12 +283,51 @@ export default class PlanarSolver {
     this.taskQueue = this.taskQueue.filter((e) => e)
   }
 
-  getFreeBot(botPredicate?: (bot: Bot) => boolean): Bot | void {
-    for (let bid in this.state.bots) {
-      if (!this.botTasks[bid] || this.botTasks[bid].isFinished())
-        if (!botPredicate || botPredicate(this.state.getBot(bid)))
-          return this.state.getBot(bid);
+}
+
+class FillNearestTask {
+  solver: PlanarSolver
+  level: number
+  finished: boolean
+
+  constructor(solver: PlanarSolver, level: number) {
+    this.solver = solver
+    this.level = level
+    this.finished = false
+  }
+
+  isFinished() {
+    return this.finished
+  }
+
+  execute(trace: Trace, bot: Bot) {
+
+    const slice = this.solver.getSlice(this.solver.targetMatrix, this.level)
+    const t = this.solver.findNextToFill(bot.pos, slice, this.solver.state.matrix)
+
+    if (!t) {
+      trace.execCommand(new Wait(), bot.bid)
+      this.finished = true;
+      return
     }
+
+    const mc = move(bot.pos, t.getAdded(coord(0, 1, 0)), this.solver.state.matrix);
+
+    if (mc) {
+      trace.execCommand(mc, bot.bid);
+      return
+    }
+
+    // arrived to destination, filling under
+    const fillc = this.solver.fillUnder(this.solver.state.matrix, this.solver.targetMatrix, bot)
+    if (fillc)
+      trace.execCommand(fillc, bot.bid);
+    else {
+      trace.execCommand(new Wait(), bot.bid)
+      this.finished = true;
+    }
+
   }
 
 }
+
