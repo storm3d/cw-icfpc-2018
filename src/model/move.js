@@ -28,8 +28,8 @@ export function freeMove(from: Coord, to: Coord, matrix: Matrix) {
 
   const diff = from.getDiff(to);
 
-  const maxLd = 3;
-  const maxSd = 1;
+  const maxLd = 15;
+  const maxSd = 5;
 
   let xlld = clamp(diff.x, maxLd);
   let ylld = clamp(diff.y, maxLd);

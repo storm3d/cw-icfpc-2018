@@ -96,7 +96,7 @@ describe('command ', () => {
     expect(() => {
       const fill2 = new trace.Fill(new Coord(1, 0, 0))
       fill2.run(state, 2)
-    }).toThrowError("Bot '2' not found")
+    }).toThrowError()
 
   })
 
