@@ -170,7 +170,7 @@ export class FusionP {
 
   constructor(nd: Coord) {
     if (!nd.isNearCoordDiff())
-      throw `Not a nd: ${nd.toString()}`
+      throw new Error(`Not a nd: ${nd.toString()}`)
     this.nd = nd.getCopy();
 
   }
@@ -306,7 +306,7 @@ export class Void {
 
   constructor(nd: Coord) {
     if (!nd.isNearCoordDiff())
-      throw `Not a nd: ${nd.toString()}`
+      throw new Error(`Not a nd: ${nd.toString()}`)
     this.nd = nd.getCopy();
   }
 
@@ -335,7 +335,7 @@ export class GFill {
 
   constructor(nd: Coord, fd: Coord) {
     if (!nd.isNearCoordDiff())
-      throw `Not a nd: ${nd.toString()}`
+      throw new Error(`Not a nd: ${nd.toString()}`)
     this.nd = nd.getCopy();
     this.fd = fd.getCopy();
   }
@@ -372,7 +372,7 @@ export class GVoid {
 
   constructor(nd: Coord, fd: Coord) {
     if (!nd.isNearCoordDiff())
-      throw `Not a nd: ${nd.toString()}`
+      throw new Error(`Not a nd: ${nd.toString()}`)
     this.nd = nd.getCopy();
     this.fd = fd.getCopy();
   }

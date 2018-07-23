@@ -4,11 +4,10 @@ import { Bot, coord, Coord, Matrix, State } from "./model/model";
 import * as command from "./model/command"
 import * as model from "./model/model"
 import FloatingVoxels from "./model/floating-voxels";
-import { FissionTask, FreeMoveTask, MoveTask, SingleCommandTask, Task } from "./tasks/task";
+import { FissionTask, FreeMoveTask, SingleCommandTask, Task } from "./tasks/task";
 import { Trace } from "./model/command";
 import { freeMove, move } from "./model/move";
 import { Wait } from "./model/command";
-import { Fission } from "./model/command";
 
 export default class PlanarSolver {
 
@@ -192,20 +191,19 @@ export default class PlanarSolver {
     // }
 
     this.submitTask(new SingleCommandTask(new command.Flip()));
-    this.submitTask(new FissionTask());
-    this.submitTask(new FissionTask());
-    this.submitTask(new FissionTask());
-    this.submitTask(new FissionTask());
+    for (let k = 0; k < 20; k++) {
+      this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
+    }
     this.executeStep()
 
-    const MAX_COMMANDS = 10000;
+    const MAX_STEPS = 100000;
 
     for (let level = 0; level < targetMatrix.r; level++) {
       let slice = this.getSlice(targetMatrix, level)
       while (slice.find((c) => ( c !== undefined ))) {
         this.executeStep(() => (new FillNearestTask(this, slice)))
 
-        if (this.trace.commands.length >= MAX_COMMANDS)
+        if (this.state.step >= MAX_STEPS)
           return this.trace;
       }
     }
@@ -314,9 +312,11 @@ class FillNearestTask {
       const x = Math.floor(Math.random() * r)
       const z = Math.floor(Math.random() * r)
 
-      const mc = freeMove(bot.pos, coord(x, bot.pos.y, z), this.solver.state.matrix)
+      this.target = coord(x, bot.pos.y, z)
+      const mc = freeMove(bot.pos, this.target, this.solver.state.matrix)
       trace.execCommand(mc ? mc : new Wait(), bot.bid)
-      this.finished = true
+      this.blockedCounter = 0
+      // this.finished = true
       return
     }
 
@@ -329,7 +329,7 @@ class FillNearestTask {
       return
     }
 
-    const mc = move(bot.pos, this.target.getAdded(coord(0, 1, 0)), this.solver.state.matrix);
+    const mc = freeMove(bot.pos, this.target.getAdded(coord(0, 1, 0)), this.solver.state.matrix);
 
     if (mc) {
       this.blockedCounter = trace.execCommand(mc, bot.bid) ? 0 : this.blockedCounter + 1;
