@@ -17,8 +17,8 @@ const exec = (inputFolder: string, outputFolder: string, num: string) => {
     //console.log(modelFileName);
     const m = readModel(modelFileName);
 
-    let solution = new MultiSolver().solve(m);
-    //let solution = new Solver().solve(m);
+    // let solution = new MultiSolver().solve(m);
+    let solution = new Solver().solve(m);
     let dump = serializeTrace(solution.commands);
 
     // console.log(dump)
