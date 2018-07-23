@@ -39,7 +39,7 @@ export default class Solver {
     if (!isBack) {
       while (cc.y !== c2.y) {
         let diff = Math.sign(c2.y - cc.y) * (Math.abs(c2.y - cc.y) > 15 ? 15 : Math.abs(c2.y - cc.y))
-        this.trace.execCommand(new command.SMove(coord(0, diff, 0)), bid)
+        this.execCommandAndTick(new command.SMove(coord(0, diff, 0)), bid)
         cc.y += diff
       }
     }
@@ -54,16 +54,16 @@ export default class Solver {
       const lmoveMlen = Math.abs(zsld) + Math.abs(xsld);
 
       if (lmoveMlen > Math.abs(xlld) && lmoveMlen > Math.abs(zlld)) {
-        this.trace.execCommand(new command.LMove(coord(xsld, 0, 0), coord(0, 0, zsld)), bid)
+        this.execCommandAndTick(new command.LMove(coord(xsld, 0, 0), coord(0, 0, zsld)), bid)
         cc.x += xsld;
         cc.z += zsld;
       }
       else if (Math.abs(zlld) > Math.abs(xlld)) {
-        this.trace.execCommand(new command.SMove(coord(0, 0, zlld)), bid)
+        this.execCommandAndTick(new command.SMove(coord(0, 0, zlld)), bid)
         cc.z += zlld
       }
       else {
-        this.trace.execCommand(new command.SMove(coord(xlld, 0, 0)), bid)
+        this.execCommandAndTick(new command.SMove(coord(xlld, 0, 0)), bid)
         cc.x += xlld
       }
     }
@@ -71,7 +71,7 @@ export default class Solver {
     if (isBack) {
       while (cc.y !== c2.y) {
         let diff = Math.sign(c2.y - cc.y) * (Math.abs(c2.y - cc.y) > 15 ? 15 : Math.abs(c2.y - cc.y))
-        this.trace.execCommand(new command.SMove(coord(0, diff, 0)), bid)
+        this.execCommandAndTick(new command.SMove(coord(0, diff, 0)), bid)
         cc.y += diff
       }
     }
@@ -84,12 +84,12 @@ export default class Solver {
     this.floatingVoxels.fill(fillPos.x, fillPos.y, fillPos.z, this.state.matrix);
 
     if (!this.floatingVoxels.allGrounded() && this.state.harmonics === 0)
-      this.trace.execCommand(new command.Flip(), bid);
+      this.execCommandAndTick(new command.Flip(), bid);
 
-    this.trace.execCommand(new command.Fill(c), bid);
+    this.execCommandAndTick(new command.Fill(c), bid);
 
     if (this.floatingVoxels.allGrounded() && this.state.harmonics !== 0)
-      this.trace.execCommand(new command.Flip(), bid);
+      this.execCommandAndTick(new command.Flip(), bid);
 
   }
 
@@ -148,6 +148,11 @@ export default class Solver {
 
   };
 
+  execCommandAndTick(command: any, bid: number) {
+    this.trace.execCommand(command, bid)
+    this.state.doEnergyTick()
+  }
+
   solve(targetMatrix: Matrix) {
 
     let matrix = new Matrix(targetMatrix.r)
@@ -157,7 +162,7 @@ export default class Solver {
     this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
     this.trace = new command.Trace(this.state)
 
-    // this.trace.execCommand(new command.Flip())
+    // this.execCommandAndTick(new command.Flip())
 
     for (let level = 0; level < matrix.r; level++) {
       let slice = this.getSlice(targetMatrix, level)
@@ -177,8 +182,8 @@ export default class Solver {
     this.getPath(this.state.getBot(1).pos, origin, bid, true)
 
     if (this.state.harmonics !== 0 )
-      this.trace.execCommand(new command.Flip())
-    this.trace.execCommand(new command.Halt())
+      this.execCommandAndTick(new command.Flip(), 1)
+    this.execCommandAndTick(new command.Halt(), 1)
 
     return this.trace
   }
