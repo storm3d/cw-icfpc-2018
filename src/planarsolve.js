@@ -4,9 +4,9 @@ import { Bot, coord, Coord, Matrix, State } from "./model/model";
 import * as command from "./model/command"
 import * as model from "./model/model"
 import FloatingVoxels from "./model/floating-voxels";
-import { FissionTask, MoveTask, SingleCommandTask, Task } from "./tasks/task";
+import { FissionTask, FreeMoveTask, MoveTask, SingleCommandTask, Task } from "./tasks/task";
 import { Trace } from "./model/command";
-import { move } from "./model/move";
+import { freeMove, move } from "./model/move";
 import { Wait } from "./model/command";
 import { Fission } from "./model/command";
 
@@ -94,7 +94,7 @@ export default class PlanarSolver {
     }
   }
 
-  findNextToFill(start: Coord, slice: Array<Coord>, matrix: Matrix) : number | void {
+  findNextToFill(start: Coord, slice: Array<Coord>, matrix: Matrix) : Coord | void {
     let cc = start.getCopy();
     let isGrounded = false
     let bestIdx = undefined
@@ -121,7 +121,7 @@ export default class PlanarSolver {
         }
       }
     }
-    return bestIdx;
+    return bestIdx !== undefined ? slice[bestIdx] : undefined;;
   }
 
 
@@ -151,38 +151,6 @@ export default class PlanarSolver {
       this.fillVoxel(coord(0, -1, 1), matrix, targetMatrix, bot) ||
       this.fillVoxel(coord(0, -1, 0), matrix, targetMatrix, bot))
   }
-
-  fillSlice(slice: Array<Coord>, matrix: Matrix, bot: Bot) {
-
-    let cc = bot.pos.getCopy();
-
-    while (1) {
-
-      let c = this.findNextToFill(cc, slice, matrix)
-      if (!c)
-          break;
-
-      let botC = c.getAdded(new Coord(0, 1, 0))
-
-      this.getPath(cc, botC, bot.bid)
-
-      cc = botC
-
-      let comm
-      while(comm = this.fillUnder(this.state.matrix, matrix, bot))
-        this.trace.execCommand(comm, bot.bid);
-
-      // for (let i = 0; i < slice.length; i++) {
-      //   if (!slice[i])
-      //     continue
-      //   if (Math.abs(slice[i].x - botC.x) + Math.abs(slice[i].z - botC.z) <= 1) {
-      //     this.fillVoxel(new Coord(Math.sign(slice[i].x - botC.x), -1, Math.sign(slice[i].z - botC.z)), bid)
-      //     delete slice[i];
-      //   }
-      // }
-    }
-
-  };
 
   solve(targetMatrix: Matrix) {
 
@@ -224,21 +192,41 @@ export default class PlanarSolver {
     // }
 
     this.submitTask(new SingleCommandTask(new command.Flip()));
+    this.submitTask(new FissionTask());
+    this.submitTask(new FissionTask());
+    this.submitTask(new FissionTask());
+    this.submitTask(new FissionTask());
     this.executeStep()
+
+    const MAX_COMMANDS = 10000;
 
     for (let level = 0; level < targetMatrix.r; level++) {
       let slice = this.getSlice(targetMatrix, level)
-      while (slice.find((c) => ( c !== undefined )) && this.state.step < 3000) {
+      while (slice.find((c) => ( c !== undefined ))) {
         this.executeStep(() => (new FillNearestTask(this, slice)))
 
+        if (this.trace.commands.length >= MAX_COMMANDS)
+          return this.trace;
       }
     }
 
-    this.submitTask(new SingleCommandTask(new command.Flip()));
-    this.submitTask(new SingleCommandTask(new command.Halt()));
-
     while (this.hasPendingTasks())
       this.executeStep()
+
+    for (let i = 0; i < this.state.getBotsNum(); i++)
+      this.submitTask(new FreeMoveTask(coord(0, 0, 0), this.state.matrix));
+
+    this.executeStep()
+    this.executeStep()
+    this.executeStep()
+    this.executeStep()
+    this.executeStep()
+
+    this.submitTask(new SingleCommandTask(new command.Flip()))
+    this.executeStep()
+
+    this.submitTask(new SingleCommandTask(new command.Halt()))
+    this.executeStep()
 
     return this.trace
   }
@@ -259,7 +247,6 @@ export default class PlanarSolver {
       else {
         this.botTasks[bid].execute(this.trace, bot);
       }
-
     }
 
     this.state.doEnergyTick()
@@ -305,11 +292,14 @@ class FillNearestTask {
   solver: PlanarSolver
   slice: Array<Coord>
   finished: boolean
+  blockedCounter: number
+  target: Coord | void
 
   constructor(solver: PlanarSolver, slice: Array<Coord>) {
     this.solver = solver
     this.slice = slice
     this.finished = false
+    this.blockedCounter = 0
   }
 
   isFinished() {
@@ -318,27 +308,41 @@ class FillNearestTask {
 
   execute(trace: Trace, bot: Bot) {
 
-    const bestIdx = this.solver.findNextToFill(bot.pos, this.slice, this.solver.state.matrix)
-    const target = bestIdx !== undefined ? this.slice[bestIdx] : undefined;
+    if (this.blockedCounter >= 3)
+    {
+      const r = this.solver.state.matrix.r
+      const x = Math.floor(Math.random() * r)
+      const z = Math.floor(Math.random() * r)
 
-    if (!target) {
+      const mc = freeMove(bot.pos, coord(x, bot.pos.y, z), this.solver.state.matrix)
+      trace.execCommand(mc ? mc : new Wait(), bot.bid)
+      this.finished = true
+      return
+    }
+
+    if (!this.target)
+      this.target = this.solver.findNextToFill(bot.pos, this.slice, this.solver.state.matrix)
+
+    if (!this.target) {
       trace.execCommand(new Wait(), bot.bid)
       this.finished = true;
       return
     }
 
-    const mc = move(bot.pos, target.getAdded(coord(0, 1, 0)), this.solver.state.matrix);
+    const mc = move(bot.pos, this.target.getAdded(coord(0, 1, 0)), this.solver.state.matrix);
 
     if (mc) {
-      trace.execCommand(mc, bot.bid);
+      this.blockedCounter = trace.execCommand(mc, bot.bid) ? 0 : this.blockedCounter + 1;
       return
     }
 
     // arrived to destination, filling under
     const fillc = this.solver.fillUnder(this.solver.state.matrix, this.solver.targetMatrix, bot)
     if (fillc) {
-      if (trace.execCommand(fillc, bot.bid)) {
+      let ran = trace.execCommand(fillc, bot.bid)
+      this.blockedCounter = ran ? 0 : this.blockedCounter + 1
 
+      if (ran) {
         const filled = bot.pos.getAdded(fillc.nd)
         const idx = this.slice.findIndex((c) => (c !== undefined && c.x === filled.x && c.y === filled.y && c.z === filled.z ))
         delete this.slice[idx]

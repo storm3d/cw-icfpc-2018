@@ -2,7 +2,7 @@
 
 import { Fission, Trace, Wait } from "../model/command";
 import { Bot, coord, Coord, Matrix, VolatileError } from "../model/model";
-import { move } from "../model/move";
+import { freeMove, move } from "../model/move";
 
 export class Task {
 
@@ -34,7 +34,7 @@ export class SingleCommandTask {
   }
 }
 
-export class MoveTask {
+export class FreeMoveTask {
   to: Coord;
   matrix: Matrix;
   finished: boolean;
@@ -47,7 +47,7 @@ export class MoveTask {
 
   execute(trace: Trace, bot: Bot) {
 
-    const c = move(bot.pos, this.to, this.matrix);
+    const c = freeMove(bot.pos, this.to, this.matrix);
 
     if (c) {
         trace.execCommand(c, bot.bid);

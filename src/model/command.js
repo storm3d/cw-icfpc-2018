@@ -14,7 +14,7 @@ export class Trace {
     try {
       c.run(this.state, bid)
       this.commands.push(c)
-      // console.log(`step: ${this.state.step}; bid: ${bid}; cmd: ${c.toString()}`)
+      // console.log(`step: ${this.state.step}; commands: ${this.commands.length}; bid: ${bid}; cmd: ${c.toString()}`)
       return true
     }
     catch (e) {
@@ -55,7 +55,7 @@ export class Halt {
 //      throw "Not only bot";
 
     if (state.harmonics !== 0)
-      throw "Not low harmonics";
+      throw new Error("Not low harmonics");
 
     state.isFinished = true
   }
@@ -92,7 +92,7 @@ export class SMove {
 
   constructor(lld: Coord) {
     if (!lld.isLongLinearDiff())
-      throw `SMove: Not a lld ${lld.toString()}`;
+      throw new Error(`SMove: Not a lld ${lld.toString()}`);
 
     this.lld = lld.getCopy();
 
@@ -113,7 +113,7 @@ export class SMove {
 
 
     if (!state.matrix.isValidCoord(c))
-      throw `SMove: not valid coord ${c.toString()}`;
+      throw new Error(`SMove: not valid coord ${c.toString()}`);
 
     bot.pos = c
     state.spendEnergy(this.lld.getMlen() * 2)

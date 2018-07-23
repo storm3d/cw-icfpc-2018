@@ -268,7 +268,7 @@ class State {
     return Object.keys(this.bots).length
   }
 
-  getBot(bid : number): Bot {
+  getBot(bid : number | string): Bot {
     if(!this.bots[bid])
       throw new Error(`Bot '${bid}' not found`)
     return this.bots[bid]
