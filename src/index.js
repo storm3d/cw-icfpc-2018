@@ -4,27 +4,23 @@ import {read} from './io/read'
 import {write} from './io/write'
 import MultiSolver from "./multisolver";
 import Solver from "./solve";
+import PlanarSolver from "./planarsolve";
 
 const exec = (inputFolder: string, outputFolder: string, num: string) => {
 
-    let m = read(inputFolder, num, 'FA', 'tgt');
-    // let solution = new MultiSolver().solve(m);
-    let solver = new Solver();
-    let solution = solver.solve(m);
-    let dump = serializeTrace(solution.commands);
-    write('FA', outputFolder, num, dump, solution.state.energy);
+    const m = read(inputFolder, num);
 
-    m = read(inputFolder, num, 'FD', 'src');
     // let solution = new MultiSolver().solve(m);
-    solver = new Solver();
-    solution = solver.solve(m);
-    let revertCommands = solver.revert();
-    dump = serializeTrace(revertCommands);
-    write('FD', outputFolder, num, dump, solution.state.energy)
+    let solution = new PlanarSolver().solve(m);
+    let dump = serializeTrace(solution.commands);
+
+    console.log(`Final energy: ${solution.state.energy}`)
+
+    write("FA", outputFolder, num, dump, solution.state.energy)
 };
 
 if (process.send === undefined) {
-    exec('problemsF', "solveF", "010");
+    exec('problemsF', "solveF", "044");
 }
 
 process.on('message', (msg) => {

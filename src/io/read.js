@@ -6,7 +6,7 @@ const modelName = (num: string, prefix: string, target: string) => {
     return `${prefix}${num}_${target}.mdl`;
 };
 
-const read = (inputFolder: string, num: string, prefix: string, target: string): Matrix => {
+const read = (inputFolder: string, num: string, prefix: string = "FA", target: string = "tgt"): Matrix => {
     let modelFileName = `./${inputFolder}/${modelName(num, prefix, target)}`;
     console.log(`read ${num} ${prefix} model`);
 
