@@ -12,6 +12,7 @@ export default class PlanarSolver {
   state: State;
   floatingVoxels: FloatingVoxels;
   botTasks: any;
+  taskQueue: Array<{task: any, botPredicate?: (bot: Bot) => boolean}>
 
   constructor(targetMatrix: Matrix | void) {
     if (targetMatrix) {
@@ -28,6 +29,7 @@ export default class PlanarSolver {
       this.floatingVoxels = new FloatingVoxels(targetMatrix.r);
       this.trace = new command.Trace(this.state);
       this.botTasks = {};
+      this.taskQueue = [];
     }
   }
 
@@ -183,20 +185,9 @@ export default class PlanarSolver {
      */
 
     let i = 0;
-    while(i++ < 30) {
+    while(i++ <= 30) {
       this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
-      this.executeStep()
     }
-
-    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
-    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
-    // this.executeStep()
-    //
-    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
-    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
-    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
-    // this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
-    // this.executeStep()
 
     i = 0;
     while (i++ < 200) {
@@ -218,6 +209,8 @@ export default class PlanarSolver {
 
   executeStep() {
 
+    this.assignTasksFromQueue()
+
     for (let bid in this.state.bots) {
       let bot = this.state.getBot(bid);
       if (!this.botTasks[bid] || this.botTasks[bid].isFinished()) {
@@ -233,20 +226,28 @@ export default class PlanarSolver {
     this.state.doEnergyTick()
   }
 
+  submitTask(task: any, botPredicate?: (bot: Bot) => boolean) {
+    this.taskQueue.push({ task, botPredicate })
+  }
+
+  assignTasksFromQueue() {
+    for (let i = 0; i < this.taskQueue.length; i++) {
+      const task = this.taskQueue[i]
+      const bot = this.getFreeBot(task.botPredicate)
+      if (bot) {
+        this.botTasks[bot.bid] = task.task
+        delete this.taskQueue[i]
+      }
+    }
+    this.taskQueue = this.taskQueue.filter((e) => e)
+  }
+
   getFreeBot(botPredicate?: (bot: Bot) => boolean): Bot | void {
     for (let bid in this.state.bots) {
       if (!this.botTasks[bid] || this.botTasks[bid].isFinished())
         if (!botPredicate || botPredicate(this.state.getBot(bid)))
           return this.state.getBot(bid);
     }
-  }
-
-  submitTask(task: any, botPredicate?: (bot: Bot) => boolean) {
-
-    const bot = this.getFreeBot(botPredicate);
-
-    if (bot)
-      this.botTasks[bot.bid] = task;
   }
 
 }

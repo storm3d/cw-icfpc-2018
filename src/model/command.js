@@ -14,10 +14,14 @@ export class Trace {
     try {
       c.run(this.state, bid)
       this.commands.push(c)
+      return true
     }
     catch (e) {
-      if (e instanceof VolatileError)
+      if (e instanceof VolatileError) {
         this.execCommand(new Wait(), bid);
+        this.commands.push(c)
+        return false
+      }
       else
         throw e;
     }
@@ -349,7 +353,7 @@ export class GFill {
     if (state.checkGFill(bid, c1, c2)) {
       const r = new Region(c1, c2)
       state.addVolatileRegion(r);
-      
+
       const res = state.doGFill(r)
       state.spendEnergy(res.empty * 12)
       state.spendEnergy(res.filled * 6)
@@ -386,7 +390,7 @@ export class GVoid {
     if (state.checkGVoid(bid, c1, c2)) {
       const r = new Region(c1, c2)
       state.addVolatileRegion(r);
-      
+
       const res = state.doGVoid(r)
       state.spendEnergy(res.empty * 3)
       state.spendEnergy(res.filled * (-12))

@@ -134,3 +134,13 @@ test("Region", () => {
   state.doEnergyTick();
   //assert.deepEqual(state.volatile, []);
 });
+
+test("fission", () => {
+  let matrix = new Matrix(2)
+  let bot = new Bot(1, new Coord(0, 0, 0), [...Array(2).keys()].map(x => x += 10))
+  let state = new State(matrix, bot)
+  state.doFission(1, 0, new Coord(0, 1, 0))
+
+  expect(state.bots[10]).not.toBeUndefined()
+  expect(state.bots[1].seeds).toEqual(expect.arrayContaining([11]))
+});

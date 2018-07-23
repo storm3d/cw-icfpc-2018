@@ -224,6 +224,10 @@ class Bot {
     this.pos = pos.getCopy();
     this.seeds = seeds;
   }
+
+  toString() {
+    return `id:${this.bid}, pos:${this.pos.toString()}, seeds:[${this.seeds.toString()}]`
+  }
 }
 
 export class VolatileError extends Error {
@@ -240,6 +244,7 @@ class State {
   bots: any;
   volatile: Array<Region>;
   isFinished: boolean
+  step: number
   fusions: any
   groupFills: any
   groupVoids: any
@@ -247,6 +252,7 @@ class State {
 
   constructor(matrix: Matrix, bot: Bot) {
     this.energy = 0;
+    this.step = 0;
     this.harmonics = 0;
     this.matrix = matrix;
     this.bots = {};
@@ -289,6 +295,7 @@ class State {
       this.spendEnergy(3*r*r*r);
 
     this.spendEnergy(20*this.getBotsNum());
+    this.step++;
 
     this.volatile = [];
     for(let bid in this.bots) {
@@ -359,7 +366,10 @@ class State {
 
   doFission(bid: number, m: number, c: Coord) {
     if (!this.bots[bid])
-      throw `Invalid fission id: ${bid}`
+      throw new Error(`Invalid fission for bot: ${bid}`)
+
+    if (this.bots[bid].seeds.length === 0)
+      throw new Error(`Invalid fission for bot with empty seeds, bot id: ${bid}`)
 
     let seeds1 = this.bots[bid].seeds
     let seeds2 = seeds1.splice(m + 1, seeds1.length)
@@ -381,7 +391,7 @@ class State {
     }
 
     if ((bid in gcommand.ids) || gcommand.coords.find(c => c.isEqual(c1)))
-        throw `${name} failed for ${bid} and coord:{c1.toString()} in ${this.groupCommandsToString(commands)}` 
+        throw `${name} failed for ${bid} and coord:{c1.toString()} in ${this.groupCommandsToString(commands)}`
 
     gcommand.ids.push(bid)
     gcommand.coords.push(c1.getCopy())

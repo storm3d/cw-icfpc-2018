@@ -56,11 +56,11 @@ export class FissionTask {
 
   execute(trace: Trace, bot: Bot) {
       if (bot.seeds.length) {
-        trace.execCommand(new Fission(coord(0, 0, 1), Math.floor(bot.seeds.length / 2)), bot.bid);
-        this.finished = true;
+        const m = Math.floor(bot.seeds.length / 2)
+        this.finished = trace.execCommand(new Fission(coord(0, 0, 1), m), bot.bid);
       }
       else
-        trace.execCommand(new Wait(), bot.bid);
+        throw new Error("Cannot fission bot without seeds")
   }
 
   isFinished() {
