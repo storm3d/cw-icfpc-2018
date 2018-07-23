@@ -1,16 +1,16 @@
 // @flow
 import fs from 'fs'
 
-const traceName = (num: string) => {
-    return `FA${num}.nbt`;
+const traceName = (num: string, prefix: string) => {
+    return `${prefix}${num}.nbt`;
 };
 
-const energyFileName = (num: string) => {
-    return `FA${num}.txt`;
+const energyFileName = (num: string, prefix: string) => {
+    return `${prefix}${num}.txt`;
 };
 
-function getEnegry(num: string): number {
-    const filename = `./energy/${energyFileName(num)}`;
+function getEnegry(num: string, prefix: string): number {
+    const filename = `./energy/${energyFileName(num, prefix)}`;
     try {
         const content = fs.readFileSync(filename).toString();
 
@@ -20,8 +20,8 @@ function getEnegry(num: string): number {
     }
 };
 
-function putEnergy(num: string, energy: number) {
-    let filename = `./energy/${energyFileName(num)}`;
+function putEnergy(num: string, energy: number, prefix: string) {
+    let filename = `./energy/${energyFileName(num, prefix)}`;
     console.log('save energy');
     fs.writeFile(filename, String(energy), (err) => {
         if (err) {
@@ -31,8 +31,8 @@ function putEnergy(num: string, energy: number) {
     });
 }
 
-function moreEfective(num: string, energy: number) {
-    const currentEnergy = getEnegry(num);
+function moreEfective(num: string, energy: number, prefix: string) {
+    const currentEnergy = getEnegry(num, prefix);
     if (currentEnergy === 0) {
 
         return true;
@@ -41,21 +41,21 @@ function moreEfective(num: string, energy: number) {
     return energy < currentEnergy;
 }
 
-function traceExit(num: string): boolean {
-    return fs.existsSync(traceName(num));
+function traceExit(num: string, prefix: string): boolean {
+    return fs.existsSync(traceName(num, prefix));
 }
 
-const write = (outputFolder: string, num: string, dump: Uint8Array, energy: number) => {
+const write = (prefix: string, outputFolder: string, num: string, dump: Uint8Array, energy: number) => {
 
-    if (moreEfective(num, energy) || !traceExit(num)) {
-        console.log(`write ${num} trace`);
-        let traceFileName = `./${outputFolder}/${traceName(num)}`;
+    if (moreEfective(num, energy, prefix) || !traceExit(num, prefix) || prefix === 'FD') {
+        console.log(`write ${num} ${prefix} trace`);
+        let traceFileName = `./${outputFolder}/${traceName(num, prefix)}`;
 
         fs.writeFile(traceFileName, Buffer.from(dump), err => {
             if (err) {
                 throw err
             } else {
-                putEnergy(num, energy);
+                putEnergy(num, energy, prefix);
 
                 if (process.send !== undefined) {
                     process.send(dump.length);

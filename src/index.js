@@ -7,17 +7,24 @@ import Solver from "./solve";
 
 const exec = (inputFolder: string, outputFolder: string, num: string) => {
 
-    const m = read(inputFolder, num);
-
+    let m = read(inputFolder, num, 'FA', 'tgt');
     // let solution = new MultiSolver().solve(m);
-    let solution = new Solver().solve(m);
+    let solver = new Solver();
+    let solution = solver.solve(m);
     let dump = serializeTrace(solution.commands);
+    write('FA', outputFolder, num, dump, solution.state.energy);
 
-    write(outputFolder, num, dump, solution.state.energy)
+    m = read(inputFolder, num, 'FD', 'src');
+    // let solution = new MultiSolver().solve(m);
+    solver = new Solver();
+    solution = solver.solve(m);
+    let revertCommands = solver.revert();
+    dump = serializeTrace(revertCommands);
+    write('FD', outputFolder, num, dump, solution.state.energy)
 };
 
 if (process.send === undefined) {
-    exec('problemsF', "solveF", "001");
+    exec('problemsF', "solveF", "010");
 }
 
 process.on('message', (msg) => {

@@ -1,8 +1,8 @@
 // @flow
 
-import { Bot, coord, Coord, Matrix, State } from "./model/model";
+import * as model from "./model/model";
+import {Bot, coord, Coord, Matrix, State} from "./model/model";
 import * as command from "./model/command"
-import * as model from "./model/model"
 import FloatingVoxels from "./model/floating-voxels";
 
 export default class Solver {
@@ -168,7 +168,7 @@ export default class Solver {
       let slice = this.getSlice(targetMatrix, level)
       //console.log(slice.length)
       if (slice === [])
-        break
+        break;
 
       //console.log(state.getBot(1).pos)
       this.fillSlice(this.state.getBot(1).pos, slice, targetMatrix)
@@ -187,5 +187,35 @@ export default class Solver {
 
     return this.trace
   }
+
+    revert() {
+
+        const commands = this.trace.commands.slice(0, -1).map((ccommand) => {
+            if (ccommand instanceof command.Fill) {
+
+                return new command.Void(ccommand.nd);
+            }
+            if (ccommand instanceof command.SMove) {
+                let lld = new Coord(ccommand.lld.x * -1, ccommand.lld.y * -1, ccommand.lld.z * -1);
+                return new command.SMove(lld);
+            }
+            if (ccommand instanceof command.LMove) {
+                let sld1 = new Coord(ccommand.sld2.x * -1, ccommand.sld2.y * -1, ccommand.sld2.z * -1);
+                let sld2 = new Coord(ccommand.sld1.x * -1, ccommand.sld1.y * -1, ccommand.sld1.z * -1);
+                return new command.LMove(sld1, sld2);
+            }
+            return ccommand;
+        }).reverse();
+        // commands.forEach((item, index) => {
+        //     console.log(index, item);
+        // });
+        // commands[0] = this.trace.commands[0];
+        commands.push(this.trace.commands[this.trace.commands.length-1]);
+        // console.log(commands);
+        // commands.forEach((item, index) => {
+        //     console.log(index, item);
+        // });
+        return commands;
+    }
 
 }
