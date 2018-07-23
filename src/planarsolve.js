@@ -88,72 +88,87 @@ export default class PlanarSolver {
     }
   }
 
+  findNextToFill(start: Coord, slice: Array<Coord>, matrix: Matrix) {
+    let cc = start.getCopy();
+    let isGrounded = false
+    let bestIdx = undefined
+    let minD = 1255
+    for (let i = 0; i < slice.length; i++) {
+      if (!slice[i])
+        continue
+      if (Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z) < minD) {
 
-  fillVoxel(c: Coord, bid: number) {
+        if (isGrounded) {
+          bestIdx = i
+          minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
+        }
+        else if (slice[i].y === 0 || matrix.isFilled(slice[i].x, slice[i].y - 1, slice[i].z)) {
+          isGrounded = true
+          bestIdx = i
+          minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
+        }
+      }
+    }
+    return bestIdx ? slice[bestIdx] : undefined;
+  }
 
-    const fillPos = this.state.getBot(1).pos.getAdded(c);
-    this.floatingVoxels.fill(fillPos.x, fillPos.y, fillPos.z, this.state.matrix);
 
-    if (!this.floatingVoxels.allGrounded() && this.state.harmonics === 0)
-      this.trace.execCommand(new command.Flip(), bid);
+  fillVoxel(c: Coord, matrix: Matrix, bot: Bot): boolean {
 
-    this.trace.execCommand(new command.Fill(c), bid);
+    // const fillPos = this.state.getBot(bid).pos.getAdded(c);
+    // this.floatingVoxels.fill(fillPos.x, fillPos.y, fillPos.z, this.state.matrix);
+    //
+    // if (!this.floatingVoxels.allGrounded() && this.state.harmonics === 0)
+    //   this.trace.execCommand(new command.Flip(), bid);
 
-    if (this.floatingVoxels.allGrounded() && this.state.harmonics !== 0)
-      this.trace.execCommand(new command.Flip(), bid);
+    let cc = bot.pos.getAdded(c)
+    if (matrix.isValidCoord(cc) && !matrix.isFilled(cc.x, cc.y, cc.z)) {
+      this.trace.execCommand(new command.Fill(c), bot.bid);
+      return true;
+    }
+
+    return false;
+
+    // if (this.floatingVoxels.allGrounded() && this.state.harmonics !== 0)
+    //   this.trace.execCommand(new command.Flip(), bid);
 
   }
 
-  fillSlice(start: Coord, slice: Array<Coord>, matrix: Matrix) {
-    let cc = start.getCopy();
+  fillUnder(matrix: Matrix, bot: Bot): boolean {
 
-    let isGrounded = false
+    return (this.fillVoxel(coord(-1, -1, 0), matrix, bot) ||
+      this.fillVoxel(coord(0, -1, 0), matrix, bot) ||
+      this.fillVoxel(coord(1, -1, 0), matrix, bot) ||
+      this.fillVoxel(coord(0, -1, -1), matrix, bot) ||
+      this.fillVoxel(coord(0, -1, 1), matrix, bot))
+  }
 
-    const bid = 1;
+  fillSlice(slice: Array<Coord>, matrix: Matrix, bot: Bot) {
+
+    let cc = bot.pos.getCopy();
 
     while (1) {
 
-      let bestI = undefined
-      let minD = 1255
-      for (let i = 0; i < slice.length; i++) {
-        if (!slice[i])
-          continue
-        if (Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z) < minD) {
-
-          if (isGrounded) {
-            bestI = i
-            minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
-          }
-          else if (slice[i].y === 0 || matrix.isFilled(slice[i].x, slice[i].y - 1, slice[i].z)) {
-            isGrounded = true
-            bestI = i
-            minD = Math.abs(cc.x - slice[i].x) + Math.abs(cc.z - slice[i].z)
-          }
-        }
-      }
-
-      //console.log(bestI)
-
-      if (bestI === undefined)
-        break
-
-      let c = slice[bestI]
+      let c = this.findNextToFill(cc, slice, matrix)
+      if (!c)
+          break;
 
       let botC = c.getAdded(new Coord(0, 1, 0))
-      //console.log(botC)
 
-      this.getPath(cc, botC, bid)
-      //console.log(path)
+      this.getPath(cc, botC, bot.bid)
+
       cc = botC
 
-      for (let i = 0; i < slice.length; i++) {
-        if (!slice[i])
-          continue
-        if (Math.abs(slice[i].x - botC.x) + Math.abs(slice[i].z - botC.z) <= 1) {
-          this.fillVoxel(new Coord(Math.sign(slice[i].x - botC.x), -1, Math.sign(slice[i].z - botC.z)), bid)
-          delete slice[i];
-        }
-      }
+      while(this.fillUnder(matrix, bot));
+
+      // for (let i = 0; i < slice.length; i++) {
+      //   if (!slice[i])
+      //     continue
+      //   if (Math.abs(slice[i].x - botC.x) + Math.abs(slice[i].z - botC.z) <= 1) {
+      //     this.fillVoxel(new Coord(Math.sign(slice[i].x - botC.x), -1, Math.sign(slice[i].z - botC.z)), bid)
+      //     delete slice[i];
+      //   }
+      // }
     }
 
   };
@@ -189,14 +204,19 @@ export default class PlanarSolver {
       this.submitTask(new FissionTask(), (bot) => (bot.seeds.length > 0));
     }
 
+
+
+    for (let level = 0; level < targetMatrix.r; level++) {
+      let slice = this.getSlice(targetMatrix, level)
+      //console.log(slice.length)
+      if (slice === [])
+        break
+
+      this.fillSlice(slice, targetMatrix, this.state.getBot(1))
+    }
+
     i = 0;
     while (i++ < 200) {
-
-      // if (this.state.getBotsNum() < 10 && this.getFreeBot())
-      //   this.submitTask(fission)
-
-      // while (this.getFreeBot())
-      //   this.submitTask(move to corner)
 
       this.executeStep()
 
