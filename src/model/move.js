@@ -14,14 +14,7 @@ export function move(from: Coord, to: Coord, matrix: Matrix) {
   if (move)
     return move;
 
-  const diff = from.getDiff(to);
-
-  if (Math.abs(diff.x) > Math.abs(diff.y) && Math.abs(diff.x) > Math.abs(diff.z))
-    return new Void(coord(Math.sign(diff.x), 0, 0));
-  else if (Math.abs(diff.y) > Math.abs(diff.z))
-    return new Void(coord(0, Math.sign(diff.x), 0));
-  else
-    return new Void(coord(0, 0, Math.sign(diff.z)));
+  return false
 }
 
 export function freeMove(from: Coord, to: Coord, matrix: Matrix) {
