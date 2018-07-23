@@ -14,12 +14,13 @@ export class Trace {
     try {
       c.run(this.state, bid)
       this.commands.push(c)
+      // console.log(`step: ${this.state.step}; bid: ${bid}; cmd: ${c.toString()}`)
       return true
     }
     catch (e) {
       if (e instanceof VolatileError) {
-        this.execCommand(new Wait(), bid);
-        this.commands.push(c)
+        const wait = new Wait()
+        this.execCommand(wait, bid);
         return false
       }
       else
